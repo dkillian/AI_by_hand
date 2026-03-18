@@ -1,0 +1,340 @@
+---
+title: "Fibonacci"
+subtitle: "Mod 9 root — the 24-step Pisano orbit"
+author: "Posit Assistant, guided by Dan Killian"
+date: 2-27-2026
+toc: true
+toc-depth: 3
+number-sections: true
+format:
+  html:
+    code-fold: true
+    page-layout: full
+execute: 
+  keep-md: true
+  warning: false
+  message: false
+editor: visual
+reference-location: margin
+---
+
+```{r global_options, include=F, warning=F, message=F, echo=F, error=F}
+library(here)
+library(knitr)
+source("../../prep (May 2025).r")
+# sna masks gt::gt() — pin the correct one to the global environment
+gt <- gt::gt
+library(ggrepel)
+```
+
+::: {.callout-note}
+This report was generated using AI under general human direction. At the time of generation, the contents have not been comprehensively reviewed by a human analyst.
+
+<!--
+To indicate human review: Delete the line above about contents not being reviewed, and replace this comment with:
+The contents have been reviewed and validated by [Your Name], [Your Role] on [Date].
+-->
+:::
+
+## Introduction
+
+The Fibonacci sequence is one of the most studied sequences in mathematics. What is less commonly appreciated is what happens when you reduce each term by its **digital root** — the repeated sum of its digits until a single digit remains, equivalent to the remainder mod 9 (with 9 substituted for 0).
+
+When reduced this way, the Fibonacci sequence enters a **closed orbit of exactly 24 steps** before repeating. This 24-step period is called the **Pisano period** for mod 9, written π(9) = 24. The orbit traces a precise path through a 9×9 **digital-root multiplication grid**, where each cell holds the digital root of its row × column product.
+
+This tutorial builds that picture from first principles:
+
+| Section | Concept |
+|---|---|
+| Fibonacci sequence | Generating terms and their digital roots |
+| Digital roots | The mod-9 arithmetic that makes this work |
+| The 9×9 grid | Visualizing the digital-root multiplication table |
+| The Pisano period | Why the sequence closes after 24 steps |
+| The orbit | Plotting the 24-step path on the grid |
+| 12-step symmetry | Why the color pattern repeats at the halfway mark |
+
+---
+
+## Setup
+
+```{r setup}
+# Digital root: dr(n) = n mod 9, with 0 replaced by 9
+digital_root <- function(n) ifelse(n %% 9 == 0, 9L, as.integer(n %% 9))
+
+# Fibonacci sequence computed entirely in digital-root arithmetic
+fib_dr_seq <- function(n) {
+  f <- integer(n)
+  f[1] <- 1L; f[2] <- 1L
+  for (i in 3:n) f[i] <- digital_root(f[i-1] + f[i-2])
+  f
+}
+
+# Color palette: each digital root gets a fixed color
+dr_colors <- c(
+  "1" = "#F5E642",   # yellow
+  "2" = "white",
+  "3" = "#5B9BD5",   # blue
+  "4" = "white",
+  "5" = "white",
+  "6" = "#E05C4B",   # red
+  "7" = "#5AAE61",   # green
+  "8" = "white",
+  "9" = "#8064A2"    # purple
+)
+
+dr_text <- c(
+  "1" = "#C8BC00", "2" = "gray50", "3" = "#2167A8",
+  "4" = "gray50",  "5" = "gray50", "6" = "#B02010",
+  "7" = "#2A7A30", "8" = "gray50", "9" = "#5A3A82"
+)
+```
+
+---
+
+## The Fibonacci Sequence
+
+The Fibonacci sequence starts with F₁ = 1, F₂ = 1, and each subsequent term is the sum of the two before it:
+
+$$F_n = F_{n-1} + F_{n-2}$$
+
+```{r fib-table}
+# Actual Fibonacci values (using numeric to avoid integer overflow)
+fib_actual <- function(n) {
+  f <- numeric(n)
+  f[1] <- 1; f[2] <- 1
+  for (i in 3:n) f[i] <- f[i-1] + f[i-2]
+  f
+}
+
+n     <- 25
+fv    <- fib_actual(n)
+fm9   <- fib_dr_seq(n)
+
+tibble(
+  `n`            = 1:n,
+  `Fₙ`           = formatC(fv, format = "fg", big.mark = ","),
+  `Fₙ mod 9`     = fm9,
+  `Color`        = fm9
+) |>
+  gt(rowname_col = "n") |>
+  tab_header(
+    title    = "Fibonacci Sequence: First 25 Terms",
+    subtitle = "Fₙ mod 9 maps each term to its digital root (1–9)"
+  ) |>
+  data_color(
+    columns  = `Color`,
+    target_columns = `Fₙ mod 9`,
+    method   = "factor",
+    palette  = unname(dr_colors[as.character(sort(unique(fm9)))])
+  ) |>
+  cols_hide(`Color`) |>
+  tab_footnote("Digital root = repeated digit sum until a single digit remains.")
+```
+
+Notice that term 25 is 1, the same as term 1 — and term 26 would be 1, the same as term 2. The sequence has **returned to its starting state** after exactly 24 steps.
+
+---
+
+## Digital Roots and the 9×9 Grid
+
+The **digital root** of a positive integer is obtained by repeatedly summing its digits until a single digit remains. For example:
+
+$$\text{dr}(144) = \text{dr}(1+4+4) = \text{dr}(9) = 9$$
+$$\text{dr}(377) = \text{dr}(3+7+7) = \text{dr}(17) = \text{dr}(1+7) = 8$$
+
+Equivalently: $\text{dr}(n) = 1 + (n - 1) \bmod 9$ for $n > 0$, which is just $n \bmod 9$ with the value 0 replaced by 9.
+
+The **9×9 digital-root multiplication grid** shows the digital root of every row × column product. Because digital roots respect multiplication (dr(a×b) = dr(dr(a) × dr(b))), this 9×9 table is closed and self-consistent.
+
+```{r grid-plot, fig.height=6, fig.width=6}
+grid_df <- expand.grid(col = 1:9, row = 1:9) |>
+  mutate(dr = digital_root(row * col))
+
+ggplot(grid_df, aes(x = col, y = row)) +
+  geom_tile(aes(fill = factor(dr)), color = "black", linewidth = 0.6) +
+  geom_text(aes(label = dr, color = factor(dr)),
+            size = 5.5, fontface = "bold") +
+  scale_fill_manual(values  = dr_colors, guide = "none") +
+  scale_color_manual(values = dr_text,   guide = "none") +
+  scale_x_continuous(breaks = 1:9, expand = c(0, 0), position = "top") +
+  scale_y_reverse(breaks = 1:9, expand = c(0, 0)) +
+  coord_fixed() +
+  labs(
+    title    = "9×9 Digital-Root Multiplication Grid",
+    subtitle = "Each cell shows dr(row × col), color-coded by value",
+    x = NULL, y = NULL
+  )
+```
+
+A few structural features worth noting:
+
+- **Row and column 9 are entirely purple (9)** — any number times 9 has digital root 9.
+- **The grid is symmetric** — dr(a × b) = dr(b × a), so the grid mirrors along the diagonal.
+- **Only five values appear as colored cells**: 1 (yellow), 3 (blue), 6 (red), 7 (green), 9 (purple). All others (2, 4, 5, 8) appear on white cells. These five are the *fixed points* and *small orbits* of digital-root multiplication.
+
+---
+
+## The Pisano Period
+
+The **Pisano period** π(m) is the length of the repeating cycle of Fibonacci numbers modulo m. For m = 9, π(9) = **24**.
+
+To see why, consider pairs of consecutive terms: the state of the Fibonacci sequence at any point is fully determined by (Fₙ, Fₙ₊₁). Since both values lie in {1, …, 9}, there are at most 81 possible states — so the sequence *must* eventually cycle. It turns out to return to the starting state (1, 1) after exactly 24 steps.
+
+```{r pisano-table}
+seq48 <- fib_dr_seq(49)   # two full periods
+
+tibble(
+  Step    = 1:48,
+  `Fₙ mod 9` = seq48[1:48],
+  Period  = ifelse(1:48 <= 24, "Period 1 (steps 1–24)", "Period 2 (steps 25–48)")
+) |>
+  gt(groupname_col = "Period") |>
+  tab_header(
+    title    = "Fibonacci mod 9: Two Full Periods",
+    subtitle = "The 24-step sequence repeats exactly"
+  ) |>
+  data_color(
+    columns = `Fₙ mod 9`,
+    method  = "factor",
+    palette = unname(dr_colors[as.character(1:9)])
+  ) |>
+  cols_label(Step = "n", `Fₙ mod 9` = "Fₙ mod 9")
+```
+
+The pair sequence confirms the cycle:
+
+```{r pair-sequence}
+orbit_df <- tibble(
+  step    = 1:24,
+  Fₙ      = seq48[1:24],
+  `Fₙ₊₁` = seq48[2:25]
+) |>
+  mutate(
+    `Product dr` = digital_root(Fₙ * `Fₙ₊₁`),
+    `Grid cell`  = paste0("(", Fₙ, ", ", `Fₙ₊₁`, ")")
+  )
+
+orbit_df |>
+  gt() |>
+  tab_header(
+    title    = "The 24 Consecutive Pairs (Fₙ, Fₙ₊₁) mod 9",
+    subtitle = "Each pair is a unique cell on the grid — none repeats until step 25"
+  ) |>
+  data_color(
+    columns = `Product dr`,
+    method  = "factor",
+    palette = unname(dr_colors[as.character(1:9)])
+  ) |>
+  cols_label(step = "Step")
+```
+
+---
+
+## The Orbit on the Grid
+
+Each pair (Fₙ mod 9, Fₙ₊₁ mod 9) locates a cell on the grid: **row = Fₙ mod 9**, **column = Fₙ₊₁ mod 9**. Plotting all 24 consecutive pairs and connecting them in order traces the orbit.
+
+The **node color** reflects the digital root of the cell's product (row × col) — i.e., the color of the cell in the grid behind it.
+
+```{r orbit-plot, fig.height=7, fig.width=8}
+orbit_arrows <- orbit_df |>
+  mutate(
+    next_row = c(Fₙ[-1],      Fₙ[1]),
+    next_col = c(`Fₙ₊₁`[-1], `Fₙ₊₁`[1])
+  )
+
+ggplot() +
+  # faint grid background
+  geom_tile(data = grid_df,
+            aes(x = col, y = row, fill = factor(dr)),
+            color = "black", linewidth = 0.3, alpha = 0.25) +
+  # arrows connecting consecutive orbit steps
+  geom_segment(data = orbit_arrows,
+               aes(x = `Fₙ₊₁`, y = Fₙ, xend = next_col, yend = next_row),
+               arrow     = arrow(length = unit(0.18, "cm"), type = "closed"),
+               linewidth = 0.45, color = "black") +
+  # orbit nodes (colored by product digital root)
+  geom_point(data = orbit_df,
+             aes(x = `Fₙ₊₁`, y = Fₙ, fill = factor(`Product dr`)),
+             shape = 21, size = 10, color = "black", stroke = 1) +
+  geom_text(data = orbit_df,
+            aes(x = `Fₙ₊₁`, y = Fₙ, label = step),
+            size = 3, fontface = "bold") +
+  scale_fill_manual(
+    values = dr_colors,
+    name   = "Product\ndigital root",
+    breaks = c("1", "3", "6", "7", "9"),
+    labels = c("1 (yellow)", "3 (blue)", "6 (red)", "7 (green)", "9 (purple)")
+  ) +
+  scale_x_continuous(breaks = 1:9, expand = c(.1, .1), position = "top") +
+  scale_y_reverse(breaks = 1:9, expand = c(.1, .1)) +
+  coord_fixed() +
+  labs(
+    title    = "The 24-Step Fibonacci Orbit on the Digital-Root Grid",
+    subtitle = "Row = Fₙ mod 9 · Column = Fₙ₊₁ mod 9 · Node color = product digital root",
+    x = "Column (Fₙ₊₁ mod 9)", y = "Row (Fₙ mod 9)"
+  ) +
+  theme(legend.position = "right")
+```
+
+The orbit visits every colored region of the grid. The **product digital root sequence** along the orbit is:
+
+$$1,\ 2,\ 6,\ 6,\ 4,\ 5,\ 3,\ 3,\ 7,\ 8,\ 9,\ 9,\ 1,\ 2,\ 6,\ 6,\ 4,\ 5,\ 3,\ 3,\ 7,\ 8,\ 9,\ 9$$
+
+The first 12 values are identical to the last 12 — the color pattern repeats exactly at the halfway point.
+
+---
+
+## The 12-Step Symmetry
+
+Why does the color pattern repeat after 12 steps instead of 24? The answer lies in a key algebraic property:
+
+$$F_{n+12} \equiv -F_n \pmod{9}$$
+
+In the 1–9 representation this means $F_{n+12} = 9 - F_n$ (for $F_n \neq 9$; a value of 9 stays 9). So each pair at step $n+12$ is the **element-wise negation** of the pair at step $n$:
+
+$$(F_{n+12},\ F_{n+13}) \equiv (-F_n,\ -F_{n+1}) \pmod{9}$$
+
+```{r symmetry-table}
+tibble(
+  Step     = 1:12,
+  `Pair (step n)`    = paste0("(", orbit_df$Fₙ[1:12], ", ", orbit_df$`Fₙ₊₁`[1:12], ")"),
+  `Pair (step n+12)` = paste0("(", orbit_df$Fₙ[13:24], ", ", orbit_df$`Fₙ₊₁`[13:24], ")"),
+  `Sum`              = orbit_df$Fₙ[1:12] + orbit_df$Fₙ[13:24],
+  `Product dr (n)`   = orbit_df$`Product dr`[1:12],
+  `Product dr (n+12)`= orbit_df$`Product dr`[13:24]
+) |>
+  gt() |>
+  tab_header(
+    title    = "12-Step Symmetry",
+    subtitle = "Each pair at step n+12 is the negative of step n mod 9 — sums equal 9 (or 18 when both are 9)"
+  ) |>
+  data_color(
+    columns  = `Product dr (n)`,
+    method   = "factor",
+    palette  = unname(dr_colors[as.character(1:9)])
+  ) |>
+  data_color(
+    columns  = `Product dr (n+12)`,
+    method   = "factor",
+    palette  = unname(dr_colors[as.character(1:9)])
+  )
+```
+
+Since $(-a)(-b) = ab$, the product of a negated pair equals the product of the original pair. Therefore $\text{dr}((-F_n)(-F_{n+1})) = \text{dr}(F_n \cdot F_{n+1})$, and **the product digital roots — and hence node colors — are identical at steps $n$ and $n + 12$**.
+
+This means the full 24-step orbit consists of two identical color sequences back to back, even though the actual cell locations differ.
+
+---
+
+## Summary
+
+| Property | Value |
+|---|---|
+| Pisano period π(9) | **24** |
+| Starting state | (F₁, F₂) = (1, 1) |
+| Number of distinct grid cells visited | 24 |
+| Product digital-root sequence period | **12** |
+| Cause of 12-step symmetry | $F_{n+12} \equiv -F_n \pmod 9$ |
+
+The Fibonacci sequence, reduced mod 9, is not random noise — it traces a perfectly closed, color-symmetric orbit that reflects deep multiplicative structure in modular arithmetic. The 9×9 digital-root grid makes that structure visible.

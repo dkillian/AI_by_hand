@@ -1,0 +1,108 @@
+---
+title: "Vector database demo"
+subtitle: "A riff on Dr. Yeh's tutorial [Vector Database by Hand](https://www.byhand.ai/p/14-can-you-calculate-a-vector-database)"
+format:
+  html:
+    toc: true
+    number-sections: true
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{r}
+source("../../prep (May 2025).R")
+library(readr)
+library(gt)
+library(htmltools)
+```
+
+## Introduction
+
+This is a tutorial on how vector databases work, inspired by Dr. Yeh's [Vector Database by Hand](https://www.byhand.ai/p/14-can-you-calculate-a-vector-database). We will explicitly follow the structure of that tutorial, but with our own data and possibly some deviations based on my own interests in what can be done with this tool. 
+
+We will proceed with establishing a corpus of text data. We will then represent that text as a set of numeric vectors. These vectors are referred to as embeddings. Next, we will store those embeddings in a vector database. Finally, we will visualize and query the vector database to demonstrate its utility.
+
+## Data
+
+We will use a corpus of haikus as our core data. First, we will import the poems in a way we can look at them. 
+
+
+```{r}
+h <- read_csv("../../Poetry/haikus.csv") %>%
+    select(text) %>%
+    rownames_to_column("id") %>%
+    mutate(haiku = str_replace_all(text, " / ", "<br>")) 
+
+nrow((h))
+
+```
+We have nearly 50,000 haikus. Let's look at a few of them.
+
+``` {r}
+
+h_gt <- h %>%
+    select(1,3) %>%
+    filter(id %in% 1:4) %>%
+    gt() %>%
+    cols_width(id ~ px(20)) %>%
+    fmt_markdown(haiku)
+
+h_gt
+```
+
+
+For the embeddings, it could be a useful source of information to know both the poem and the line of the poem.  
+
+
+```{r}
+h_long <- h %>%
+    separate_rows(text, sep=" / ") %>%
+    group_by(id) %>%
+    mutate(line = row_number()) %>%
+    ungroup() %>%
+    mutate(id2 = paste(id, line, sep="-")) %>%
+    select(id, line, id2, haiku=text)
+
+head(h_long)
+
+```
+
+We are not able to pass a vector of lines and a vector of poems into a common embedding space, because the two vectors have a different size. What we will do is compute line embeddings, and perhaps show at some point that we can recover poem embeddings by averaging the poem's line embeddings. 
+
+```{r}
+
+h_long_samp <- h_long %>%
+    .[1:3000,]
+
+library(ragnar)
+
+# embeds returned as a numeric matrix: rows = lines, cols = embedding dims
+emb_mat <- ragnar::embed_openai(
+  h_long_samp$haiku,
+  model = "text-embedding-3-small",
+  batch_size = 10L
+)
+
+# attach as a list-column (one numeric vector per row)
+h_long_emb <- h_long_samp |>
+  mutate(vec = lapply(seq_len(nrow(emb_mat)), \(i) unname(emb_mat[i, ])))
+
+```
+
+
+```{r}
+
+```
+
+
+## Embeddings
+
+## Vector database
+
+## Visualization
+
+## Query 
+
+

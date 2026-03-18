@@ -1,0 +1,3417 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Posit Assistant, guided by Dan Killian">
+<meta name="dcterms.date" content="2026-02-27">
+
+<title>Fibonacci</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="Fibonnacci mod 9 root_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Fibonnacci mod 9 root_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="Fibonnacci mod 9 root_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="Fibonnacci mod 9 root_files/libs/quarto-html/popper.min.js"></script>
+<script src="Fibonnacci mod 9 root_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="Fibonnacci mod 9 root_files/libs/quarto-html/anchor.min.js"></script>
+<link href="Fibonnacci mod 9 root_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Fibonnacci mod 9 root_files/libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="Fibonnacci mod 9 root_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="Fibonnacci mod 9 root_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="Fibonnacci mod 9 root_files/libs/bootstrap/bootstrap-bb462d781dde1847d9e3ccf7736099dd.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-full">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="header-section-number">1</span> Introduction</a></li>
+  <li><a href="#setup" id="toc-setup" class="nav-link" data-scroll-target="#setup"><span class="header-section-number">2</span> Setup</a></li>
+  <li><a href="#the-fibonacci-sequence" id="toc-the-fibonacci-sequence" class="nav-link" data-scroll-target="#the-fibonacci-sequence"><span class="header-section-number">3</span> The Fibonacci Sequence</a></li>
+  <li><a href="#digital-roots-and-the-99-grid" id="toc-digital-roots-and-the-99-grid" class="nav-link" data-scroll-target="#digital-roots-and-the-99-grid"><span class="header-section-number">4</span> Digital Roots and the 9×9 Grid</a></li>
+  <li><a href="#the-pisano-period" id="toc-the-pisano-period" class="nav-link" data-scroll-target="#the-pisano-period"><span class="header-section-number">5</span> The Pisano Period</a></li>
+  <li><a href="#the-orbit-on-the-grid" id="toc-the-orbit-on-the-grid" class="nav-link" data-scroll-target="#the-orbit-on-the-grid"><span class="header-section-number">6</span> The Orbit on the Grid</a></li>
+  <li><a href="#the-12-step-symmetry" id="toc-the-12-step-symmetry" class="nav-link" data-scroll-target="#the-12-step-symmetry"><span class="header-section-number">7</span> The 12-Step Symmetry</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">8</span> Summary</a></li>
+  </ul>
+</nav>
+</div>
+<main class="content column-page-left" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Fibonacci</h1>
+<p class="subtitle lead">Mod 9 root — the 24-step Pisano orbit</p>
+</div>
+
+
+
+<div class="quarto-title-meta column-page-left">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Posit Assistant, guided by Dan Killian </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">February 27, 2026</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This report was generated using AI under general human direction. At the time of generation, the contents have not been comprehensively reviewed by a human analyst.</p>
+<!--
+To indicate human review: Delete the line above about contents not being reviewed, and replace this comment with:
+The contents have been reviewed and validated by [Your Name], [Your Role] on [Date].
+-->
+</div>
+</div>
+<section id="introduction" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="introduction"><span class="header-section-number">1</span> Introduction</h2>
+<p>The Fibonacci sequence is one of the most studied sequences in mathematics. What is less commonly appreciated is what happens when you reduce each term by its <strong>digital root</strong> — the repeated sum of its digits until a single digit remains, equivalent to the remainder mod 9 (with 9 substituted for 0).</p>
+<p>When reduced this way, the Fibonacci sequence enters a <strong>closed orbit of exactly 24 steps</strong> before repeating. This 24-step period is called the <strong>Pisano period</strong> for mod 9, written π(9) = 24. The orbit traces a precise path through a 9×9 <strong>digital-root multiplication grid</strong>, where each cell holds the digital root of its row × column product.</p>
+<p>This tutorial builds that picture from first principles:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Section</th>
+<th>Concept</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Fibonacci sequence</td>
+<td>Generating terms and their digital roots</td>
+</tr>
+<tr class="even">
+<td>Digital roots</td>
+<td>The mod-9 arithmetic that makes this work</td>
+</tr>
+<tr class="odd">
+<td>The 9×9 grid</td>
+<td>Visualizing the digital-root multiplication table</td>
+</tr>
+<tr class="even">
+<td>The Pisano period</td>
+<td>Why the sequence closes after 24 steps</td>
+</tr>
+<tr class="odd">
+<td>The orbit</td>
+<td>Plotting the 24-step path on the grid</td>
+</tr>
+<tr class="even">
+<td>12-step symmetry</td>
+<td>Why the color pattern repeats at the halfway mark</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="setup" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="setup"><span class="header-section-number">2</span> Setup</h2>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Digital root: dr(n) = n mod 9, with 0 replaced by 9</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>digital_root <span class="ot">&lt;-</span> <span class="cf">function</span>(n) <span class="fu">ifelse</span>(n <span class="sc">%%</span> <span class="dv">9</span> <span class="sc">==</span> <span class="dv">0</span>, <span class="dv">9</span>L, <span class="fu">as.integer</span>(n <span class="sc">%%</span> <span class="dv">9</span>))</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Fibonacci sequence computed entirely in digital-root arithmetic</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>fib_dr_seq <span class="ot">&lt;-</span> <span class="cf">function</span>(n) {</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  f <span class="ot">&lt;-</span> <span class="fu">integer</span>(n)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  f[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="dv">1</span>L; f[<span class="dv">2</span>] <span class="ot">&lt;-</span> <span class="dv">1</span>L</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">3</span><span class="sc">:</span>n) f[i] <span class="ot">&lt;-</span> <span class="fu">digital_root</span>(f[i<span class="dv">-1</span>] <span class="sc">+</span> f[i<span class="dv">-2</span>])</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  f</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Color palette: each digital root gets a fixed color</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>dr_colors <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="st">"1"</span> <span class="ot">=</span> <span class="st">"#F5E642"</span>,   <span class="co"># yellow</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="st">"2"</span> <span class="ot">=</span> <span class="st">"white"</span>,</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="st">"3"</span> <span class="ot">=</span> <span class="st">"#5B9BD5"</span>,   <span class="co"># blue</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="st">"4"</span> <span class="ot">=</span> <span class="st">"white"</span>,</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  <span class="st">"5"</span> <span class="ot">=</span> <span class="st">"white"</span>,</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  <span class="st">"6"</span> <span class="ot">=</span> <span class="st">"#E05C4B"</span>,   <span class="co"># red</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  <span class="st">"7"</span> <span class="ot">=</span> <span class="st">"#5AAE61"</span>,   <span class="co"># green</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>  <span class="st">"8"</span> <span class="ot">=</span> <span class="st">"white"</span>,</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>  <span class="st">"9"</span> <span class="ot">=</span> <span class="st">"#8064A2"</span>    <span class="co"># purple</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>dr_text <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>  <span class="st">"1"</span> <span class="ot">=</span> <span class="st">"#C8BC00"</span>, <span class="st">"2"</span> <span class="ot">=</span> <span class="st">"gray50"</span>, <span class="st">"3"</span> <span class="ot">=</span> <span class="st">"#2167A8"</span>,</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>  <span class="st">"4"</span> <span class="ot">=</span> <span class="st">"gray50"</span>,  <span class="st">"5"</span> <span class="ot">=</span> <span class="st">"gray50"</span>, <span class="st">"6"</span> <span class="ot">=</span> <span class="st">"#B02010"</span>,</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>  <span class="st">"7"</span> <span class="ot">=</span> <span class="st">"#2A7A30"</span>, <span class="st">"8"</span> <span class="ot">=</span> <span class="st">"gray50"</span>, <span class="st">"9"</span> <span class="ot">=</span> <span class="st">"#5A3A82"</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<hr>
+</section>
+<section id="the-fibonacci-sequence" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="the-fibonacci-sequence"><span class="header-section-number">3</span> The Fibonacci Sequence</h2>
+<p>The Fibonacci sequence starts with F₁ = 1, F₂ = 1, and each subsequent term is the sum of the two before it:</p>
+<p><span class="math display">\[F_n = F_{n-1} + F_{n-2}\]</span></p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Actual Fibonacci values (using numeric to avoid integer overflow)</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>fib_actual <span class="ot">&lt;-</span> <span class="cf">function</span>(n) {</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  f <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  f[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="dv">1</span>; f[<span class="dv">2</span>] <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">3</span><span class="sc">:</span>n) f[i] <span class="ot">&lt;-</span> f[i<span class="dv">-1</span>] <span class="sc">+</span> f[i<span class="dv">-2</span>]</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  f</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>n     <span class="ot">&lt;-</span> <span class="dv">25</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>fv    <span class="ot">&lt;-</span> <span class="fu">fib_actual</span>(n)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>fm9   <span class="ot">&lt;-</span> <span class="fu">fib_dr_seq</span>(n)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="fu">tibble</span>(</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">n</span><span class="st">`</span>            <span class="ot">=</span> <span class="dv">1</span><span class="sc">:</span>n,</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Fₙ</span><span class="st">`</span>           <span class="ot">=</span> <span class="fu">formatC</span>(fv, <span class="at">format =</span> <span class="st">"fg"</span>, <span class="at">big.mark =</span> <span class="st">","</span>),</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Fₙ mod 9</span><span class="st">`</span>     <span class="ot">=</span> fm9,</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Color</span><span class="st">`</span>        <span class="ot">=</span> fm9</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gt</span>(<span class="at">rowname_col =</span> <span class="st">"n"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tab_header</span>(</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">title    =</span> <span class="st">"Fibonacci Sequence: First 25 Terms"</span>,</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"Fₙ mod 9 maps each term to its digital root (1–9)"</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data_color</span>(</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">columns  =</span> <span class="st">`</span><span class="at">Color</span><span class="st">`</span>,</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">target_columns =</span> <span class="st">`</span><span class="at">Fₙ mod 9</span><span class="st">`</span>,</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">method   =</span> <span class="st">"factor"</span>,</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">palette  =</span> <span class="fu">unname</span>(dr_colors[<span class="fu">as.character</span>(<span class="fu">sort</span>(<span class="fu">unique</span>(fm9)))])</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cols_hide</span>(<span class="st">`</span><span class="at">Color</span><span class="st">`</span>) <span class="sc">|&gt;</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tab_footnote</span>(<span class="st">"Digital root = repeated digit sum until a single digit remains."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="juaawohwdt" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#juaawohwdt table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#juaawohwdt thead, #juaawohwdt tbody, #juaawohwdt tfoot, #juaawohwdt tr, #juaawohwdt td, #juaawohwdt th {
+  border-style: none;
+}
+
+#juaawohwdt p {
+  margin: 0;
+  padding: 0;
+}
+
+#juaawohwdt .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#juaawohwdt .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#juaawohwdt .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#juaawohwdt .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#juaawohwdt .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#juaawohwdt .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#juaawohwdt .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#juaawohwdt .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#juaawohwdt .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#juaawohwdt .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#juaawohwdt .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#juaawohwdt .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#juaawohwdt .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#juaawohwdt .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#juaawohwdt .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#juaawohwdt .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#juaawohwdt .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#juaawohwdt .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#juaawohwdt .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#juaawohwdt .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#juaawohwdt .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#juaawohwdt .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#juaawohwdt .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#juaawohwdt .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#juaawohwdt .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#juaawohwdt .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#juaawohwdt .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#juaawohwdt .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#juaawohwdt .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#juaawohwdt .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#juaawohwdt .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#juaawohwdt .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#juaawohwdt .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#juaawohwdt .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#juaawohwdt .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#juaawohwdt .gt_left {
+  text-align: left;
+}
+
+#juaawohwdt .gt_center {
+  text-align: center;
+}
+
+#juaawohwdt .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#juaawohwdt .gt_font_normal {
+  font-weight: normal;
+}
+
+#juaawohwdt .gt_font_bold {
+  font-weight: bold;
+}
+
+#juaawohwdt .gt_font_italic {
+  font-style: italic;
+}
+
+#juaawohwdt .gt_super {
+  font-size: 65%;
+}
+
+#juaawohwdt .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#juaawohwdt .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#juaawohwdt .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#juaawohwdt .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#juaawohwdt .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#juaawohwdt .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#juaawohwdt .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#juaawohwdt .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#juaawohwdt div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+
+<table class="gt_table caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+<thead>
+<tr class="gt_heading header">
+<th colspan="3" class="gt_heading gt_title gt_font_normal">Fibonacci Sequence: First 25 Terms</th>
+</tr>
+<tr class="gt_heading even">
+<th colspan="3" class="gt_heading gt_subtitle gt_font_normal gt_bottom_border">Fₙ mod 9 maps each term to its digital root (1–9)</th>
+</tr>
+<tr class="gt_col_headings header">
+<th id="a::stub" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col"></th>
+<th id="Fₙ" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Fₙ</th>
+<th id="Fₙ-mod-9" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Fₙ mod 9</th>
+</tr>
+</thead>
+<tbody class="gt_table_body">
+<tr class="odd">
+<td id="stub_1_1" class="gt_row gt_right gt_stub" data-quarto-table-cell-role="th" scope="row">1</td>
+<td class="gt_row gt_right" headers="stub_1_1 Fₙ">1</td>
+<td class="gt_row gt_right" headers="stub_1_1 Fₙ mod 9" style="background-color: #F5E642; color: #000000">1</td>
+</tr>
+<tr class="even">
+<td id="stub_1_2" class="gt_row gt_right gt_stub" data-quarto-table-cell-role="th" scope="row">2</td>
+<td class="gt_row gt_right" headers="stub_1_2 Fₙ">1</td>
+<td class="gt_row gt_right" headers="stub_1_2 Fₙ mod 9" style="background-color: #F5E642; color: #000000">1</td>
+</tr>
+<tr class="odd">
+<td id="stub_1_3" class="gt_row gt_right gt_stub" data-quarto-table-cell-role="th" scope="row">3</td>
+<td class="gt_row gt_right" headers="stub_1_3 Fₙ">2</td>
+<td class="gt_row gt_right" headers="stub_1_3 Fₙ mod 9" style="background-color: #FFFFFF; color: #000000">2</td>
+</tr>
+<tr class="even">
+<td id="stub_1_4" class="gt_row gt_right gt_stub" data-quarto-table-cell-role="th" scope="row">4</td>
+<td class="gt_row gt_right" headers="stub_1_4 Fₙ">3</td>
+<td class="gt_row gt_right" headers="stub_1_4 Fₙ mod 9" style="background-color: #5B9BD5; color: #FFFFFF">3</td>
+</tr>
+<tr class="odd">
+<td id="stub_1_5" class="gt_row gt_right gt_stub" data-quarto-table-cell-role="th" scope="row">5</td>
+<td class="gt_row gt_right" headers="stub_1_5 Fₙ">5</td>
+<td class="gt_row gt_right" headers="stub_1_5 Fₙ mod 9" style="background-color: #FFFFFF; color: #000000">5</td>
+</tr>
+<tr class="even">
+<td id="stub_1_6" class="gt_row gt_right gt_stub" data-quarto-table-cell-role="th" scope="row">6</td>
+<td class="gt_row gt_right" headers="stub_1_6 Fₙ">8</td>
+<td class="gt_row gt_right" headers="stub_1_6 Fₙ mod 9" style="background-color: #FFFFFF; color: #000000">8</td>
+</tr>
+<tr class="odd">
+<td id="stub_1_7" class="gt_row gt_right gt_stub" data-quarto-table-cell-role="th" scope="row">7</td>
+<td class="gt_row gt_right" headers="stub_1_7 Fₙ">13</td>
+<td class="gt_row gt_right" headers="stub_1_7 Fₙ mod 9" style="background-color: #FFFFFF; color: #000000">4</td>
+</tr>
+<tr class="even">
+<td id="stub_1_8" class="gt_row gt_right gt_stub" data-quarto-table-cell-role="th" scope="row">8</td>
+<td class="gt_row gt_right" headers="stub_1_8 Fₙ">21</td>
+<td class="gt_row gt_right" headers="stub_1_8 Fₙ mod 9" style="background-color: #5B9BD5; color: #FFFFFF">3</td>
+</tr>
+<tr class="odd">
+<td id="stub_1_9" class="gt_row gt_right gt_stub" data-quarto-table-cell-role="th" scope="row">9</td>
+<td class="gt_row gt_right" headers="stub_1_9 Fₙ">34</td>
+<td class="gt_row gt_right" headers="stub_1_9 Fₙ mod 9" style="background-color: #5AAE61; color: #FFFFFF">7</td>
+</tr>
+<tr class="even">
+<td id="stub_1_10" class="gt_row gt_right gt_stub" data-quarto-table-cell-role="th" scope="row">10</td>
+<td class="gt_row gt_right" headers="stub_1_10 Fₙ">55</td>
+<td class="gt_row gt_right" headers="stub_1_10 Fₙ mod 9" style="background-color: #F5E642; color: #000000">1</td>
+</tr>
+<tr class="odd">
+<td id="stub_1_11" class="gt_row gt_right gt_stub" data-quarto-table-cell-role="th" scope="row">11</td>
+<td class="gt_row gt_right" headers="stub_1_11 Fₙ">89</td>
+<td class="gt_row gt_right" headers="stub_1_11 Fₙ mod 9" style="background-color: #FFFFFF; color: #000000">8</td>
+</tr>
+<tr class="even">
+<td id="stub_1_12" class="gt_row gt_right gt_stub" data-quarto-table-cell-role="th" scope="row">12</td>
+<td class="gt_row gt_right" headers="stub_1_12 Fₙ">144</td>
+<td class="gt_row gt_right" headers="stub_1_12 Fₙ mod 9" style="background-color: #8064A2; color: #FFFFFF">9</td>
+</tr>
+<tr class="odd">
+<td id="stub_1_13" class="gt_row gt_right gt_stub" data-quarto-table-cell-role="th" scope="row">13</td>
+<td class="gt_row gt_right" headers="stub_1_13 Fₙ">233</td>
+<td class="gt_row gt_right" headers="stub_1_13 Fₙ mod 9" style="background-color: #FFFFFF; color: #000000">8</td>
+</tr>
+<tr class="even">
+<td id="stub_1_14" class="gt_row gt_right gt_stub" data-quarto-table-cell-role="th" scope="row">14</td>
+<td class="gt_row gt_right" headers="stub_1_14 Fₙ">377</td>
+<td class="gt_row gt_right" headers="stub_1_14 Fₙ mod 9" style="background-color: #FFFFFF; color: #000000">8</td>
+</tr>
+<tr class="odd">
+<td id="stub_1_15" class="gt_row gt_right gt_stub" data-quarto-table-cell-role="th" scope="row">15</td>
+<td class="gt_row gt_right" headers="stub_1_15 Fₙ">610</td>
+<td class="gt_row gt_right" headers="stub_1_15 Fₙ mod 9" style="background-color: #5AAE61; color: #FFFFFF">7</td>
+</tr>
+<tr class="even">
+<td id="stub_1_16" class="gt_row gt_right gt_stub" data-quarto-table-cell-role="th" scope="row">16</td>
+<td class="gt_row gt_right" headers="stub_1_16 Fₙ">987</td>
+<td class="gt_row gt_right" headers="stub_1_16 Fₙ mod 9" style="background-color: #E05C4B; color: #FFFFFF">6</td>
+</tr>
+<tr class="odd">
+<td id="stub_1_17" class="gt_row gt_right gt_stub" data-quarto-table-cell-role="th" scope="row">17</td>
+<td class="gt_row gt_right" headers="stub_1_17 Fₙ">1,597</td>
+<td class="gt_row gt_right" headers="stub_1_17 Fₙ mod 9" style="background-color: #FFFFFF; color: #000000">4</td>
+</tr>
+<tr class="even">
+<td id="stub_1_18" class="gt_row gt_right gt_stub" data-quarto-table-cell-role="th" scope="row">18</td>
+<td class="gt_row gt_right" headers="stub_1_18 Fₙ">2,584</td>
+<td class="gt_row gt_right" headers="stub_1_18 Fₙ mod 9" style="background-color: #F5E642; color: #000000">1</td>
+</tr>
+<tr class="odd">
+<td id="stub_1_19" class="gt_row gt_right gt_stub" data-quarto-table-cell-role="th" scope="row">19</td>
+<td class="gt_row gt_right" headers="stub_1_19 Fₙ">4,181</td>
+<td class="gt_row gt_right" headers="stub_1_19 Fₙ mod 9" style="background-color: #FFFFFF; color: #000000">5</td>
+</tr>
+<tr class="even">
+<td id="stub_1_20" class="gt_row gt_right gt_stub" data-quarto-table-cell-role="th" scope="row">20</td>
+<td class="gt_row gt_right" headers="stub_1_20 Fₙ">6,765</td>
+<td class="gt_row gt_right" headers="stub_1_20 Fₙ mod 9" style="background-color: #E05C4B; color: #FFFFFF">6</td>
+</tr>
+<tr class="odd">
+<td id="stub_1_21" class="gt_row gt_right gt_stub" data-quarto-table-cell-role="th" scope="row">21</td>
+<td class="gt_row gt_right" headers="stub_1_21 Fₙ">10,946</td>
+<td class="gt_row gt_right" headers="stub_1_21 Fₙ mod 9" style="background-color: #FFFFFF; color: #000000">2</td>
+</tr>
+<tr class="even">
+<td id="stub_1_22" class="gt_row gt_right gt_stub" data-quarto-table-cell-role="th" scope="row">22</td>
+<td class="gt_row gt_right" headers="stub_1_22 Fₙ">17,711</td>
+<td class="gt_row gt_right" headers="stub_1_22 Fₙ mod 9" style="background-color: #FFFFFF; color: #000000">8</td>
+</tr>
+<tr class="odd">
+<td id="stub_1_23" class="gt_row gt_right gt_stub" data-quarto-table-cell-role="th" scope="row">23</td>
+<td class="gt_row gt_right" headers="stub_1_23 Fₙ">28,657</td>
+<td class="gt_row gt_right" headers="stub_1_23 Fₙ mod 9" style="background-color: #F5E642; color: #000000">1</td>
+</tr>
+<tr class="even">
+<td id="stub_1_24" class="gt_row gt_right gt_stub" data-quarto-table-cell-role="th" scope="row">24</td>
+<td class="gt_row gt_right" headers="stub_1_24 Fₙ">46,368</td>
+<td class="gt_row gt_right" headers="stub_1_24 Fₙ mod 9" style="background-color: #8064A2; color: #FFFFFF">9</td>
+</tr>
+<tr class="odd">
+<td id="stub_1_25" class="gt_row gt_right gt_stub" data-quarto-table-cell-role="th" scope="row">25</td>
+<td class="gt_row gt_right" headers="stub_1_25 Fₙ">75,025</td>
+<td class="gt_row gt_right" headers="stub_1_25 Fₙ mod 9" style="background-color: #F5E642; color: #000000">1</td>
+</tr>
+</tbody><tfoot>
+<tr class="gt_footnotes odd">
+<td colspan="3" class="gt_footnote">Digital root = repeated digit sum until a single digit remains.</td>
+</tr>
+</tfoot>
+
+</table>
+
+</div>
+</div>
+</div>
+<p>Notice that term 25 is 1, the same as term 1 — and term 26 would be 1, the same as term 2. The sequence has <strong>returned to its starting state</strong> after exactly 24 steps.</p>
+<hr>
+</section>
+<section id="digital-roots-and-the-99-grid" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="digital-roots-and-the-99-grid"><span class="header-section-number">4</span> Digital Roots and the 9×9 Grid</h2>
+<p>The <strong>digital root</strong> of a positive integer is obtained by repeatedly summing its digits until a single digit remains. For example:</p>
+<p><span class="math display">\[\text{dr}(144) = \text{dr}(1+4+4) = \text{dr}(9) = 9\]</span> <span class="math display">\[\text{dr}(377) = \text{dr}(3+7+7) = \text{dr}(17) = \text{dr}(1+7) = 8\]</span></p>
+<p>Equivalently: <span class="math inline">\(\text{dr}(n) = 1 + (n - 1) \bmod 9\)</span> for <span class="math inline">\(n &gt; 0\)</span>, which is just <span class="math inline">\(n \bmod 9\)</span> with the value 0 replaced by 9.</p>
+<p>The <strong>9×9 digital-root multiplication grid</strong> shows the digital root of every row × column product. Because digital roots respect multiplication (dr(a×b) = dr(dr(a) × dr(b))), this 9×9 table is closed and self-consistent.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>grid_df <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(<span class="at">col =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">9</span>, <span class="at">row =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">9</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">dr =</span> <span class="fu">digital_root</span>(row <span class="sc">*</span> col))</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(grid_df, <span class="fu">aes</span>(<span class="at">x =</span> col, <span class="at">y =</span> row)) <span class="sc">+</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>(<span class="fu">aes</span>(<span class="at">fill =</span> <span class="fu">factor</span>(dr)), <span class="at">color =</span> <span class="st">"black"</span>, <span class="at">linewidth =</span> <span class="fl">0.6</span>) <span class="sc">+</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> dr, <span class="at">color =</span> <span class="fu">factor</span>(dr)),</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>            <span class="at">size =</span> <span class="fl">5.5</span>, <span class="at">fontface =</span> <span class="st">"bold"</span>) <span class="sc">+</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values  =</span> dr_colors, <span class="at">guide =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> dr_text,   <span class="at">guide =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">9</span>, <span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>), <span class="at">position =</span> <span class="st">"top"</span>) <span class="sc">+</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_reverse</span>(<span class="at">breaks =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">9</span>, <span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>)) <span class="sc">+</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_fixed</span>() <span class="sc">+</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">title    =</span> <span class="st">"9×9 Digital-Root Multiplication Grid"</span>,</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"Each cell shows dr(row × col), color-coded by value"</span>,</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="cn">NULL</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Fibonnacci-mod-9-root_files/figure-html/grid-plot-1.png" class="img-fluid figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>A few structural features worth noting:</p>
+<ul>
+<li><strong>Row and column 9 are entirely purple (9)</strong> — any number times 9 has digital root 9.</li>
+<li><strong>The grid is symmetric</strong> — dr(a × b) = dr(b × a), so the grid mirrors along the diagonal.</li>
+<li><strong>Only five values appear as colored cells</strong>: 1 (yellow), 3 (blue), 6 (red), 7 (green), 9 (purple). All others (2, 4, 5, 8) appear on white cells. These five are the <em>fixed points</em> and <em>small orbits</em> of digital-root multiplication.</li>
+</ul>
+<hr>
+</section>
+<section id="the-pisano-period" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="the-pisano-period"><span class="header-section-number">5</span> The Pisano Period</h2>
+<p>The <strong>Pisano period</strong> π(m) is the length of the repeating cycle of Fibonacci numbers modulo m. For m = 9, π(9) = <strong>24</strong>.</p>
+<p>To see why, consider pairs of consecutive terms: the state of the Fibonacci sequence at any point is fully determined by (Fₙ, Fₙ₊₁). Since both values lie in {1, …, 9}, there are at most 81 possible states — so the sequence <em>must</em> eventually cycle. It turns out to return to the starting state (1, 1) after exactly 24 steps.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>seq48 <span class="ot">&lt;-</span> <span class="fu">fib_dr_seq</span>(<span class="dv">49</span>)   <span class="co"># two full periods</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">tibble</span>(</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">Step    =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">48</span>,</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Fₙ mod 9</span><span class="st">`</span> <span class="ot">=</span> seq48[<span class="dv">1</span><span class="sc">:</span><span class="dv">48</span>],</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">Period  =</span> <span class="fu">ifelse</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">48</span> <span class="sc">&lt;=</span> <span class="dv">24</span>, <span class="st">"Period 1 (steps 1–24)"</span>, <span class="st">"Period 2 (steps 25–48)"</span>)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gt</span>(<span class="at">groupname_col =</span> <span class="st">"Period"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tab_header</span>(</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">title    =</span> <span class="st">"Fibonacci mod 9: Two Full Periods"</span>,</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"The 24-step sequence repeats exactly"</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data_color</span>(</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">columns =</span> <span class="st">`</span><span class="at">Fₙ mod 9</span><span class="st">`</span>,</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">method  =</span> <span class="st">"factor"</span>,</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">palette =</span> <span class="fu">unname</span>(dr_colors[<span class="fu">as.character</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">9</span>)])</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cols_label</span>(<span class="at">Step =</span> <span class="st">"n"</span>, <span class="st">`</span><span class="at">Fₙ mod 9</span><span class="st">`</span> <span class="ot">=</span> <span class="st">"Fₙ mod 9"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="dngmnmvpoq" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#dngmnmvpoq table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#dngmnmvpoq thead, #dngmnmvpoq tbody, #dngmnmvpoq tfoot, #dngmnmvpoq tr, #dngmnmvpoq td, #dngmnmvpoq th {
+  border-style: none;
+}
+
+#dngmnmvpoq p {
+  margin: 0;
+  padding: 0;
+}
+
+#dngmnmvpoq .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#dngmnmvpoq .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#dngmnmvpoq .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#dngmnmvpoq .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#dngmnmvpoq .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#dngmnmvpoq .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#dngmnmvpoq .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#dngmnmvpoq .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#dngmnmvpoq .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#dngmnmvpoq .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#dngmnmvpoq .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#dngmnmvpoq .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#dngmnmvpoq .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#dngmnmvpoq .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#dngmnmvpoq .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#dngmnmvpoq .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#dngmnmvpoq .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#dngmnmvpoq .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#dngmnmvpoq .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#dngmnmvpoq .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#dngmnmvpoq .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#dngmnmvpoq .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#dngmnmvpoq .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#dngmnmvpoq .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#dngmnmvpoq .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#dngmnmvpoq .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#dngmnmvpoq .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#dngmnmvpoq .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#dngmnmvpoq .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#dngmnmvpoq .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#dngmnmvpoq .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#dngmnmvpoq .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#dngmnmvpoq .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#dngmnmvpoq .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#dngmnmvpoq .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#dngmnmvpoq .gt_left {
+  text-align: left;
+}
+
+#dngmnmvpoq .gt_center {
+  text-align: center;
+}
+
+#dngmnmvpoq .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#dngmnmvpoq .gt_font_normal {
+  font-weight: normal;
+}
+
+#dngmnmvpoq .gt_font_bold {
+  font-weight: bold;
+}
+
+#dngmnmvpoq .gt_font_italic {
+  font-style: italic;
+}
+
+#dngmnmvpoq .gt_super {
+  font-size: 65%;
+}
+
+#dngmnmvpoq .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#dngmnmvpoq .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#dngmnmvpoq .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#dngmnmvpoq .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#dngmnmvpoq .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#dngmnmvpoq .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#dngmnmvpoq .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#dngmnmvpoq .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#dngmnmvpoq div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+
+<table class="gt_table caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+<thead>
+<tr class="gt_heading header">
+<th colspan="2" class="gt_heading gt_title gt_font_normal">Fibonacci mod 9: Two Full Periods</th>
+</tr>
+<tr class="gt_heading even">
+<th colspan="2" class="gt_heading gt_subtitle gt_font_normal gt_bottom_border">The 24-step sequence repeats exactly</th>
+</tr>
+<tr class="gt_col_headings header">
+<th id="Step" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">n</th>
+<th id="Fₙ-mod-9" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Fₙ mod 9</th>
+</tr>
+</thead>
+<tbody class="gt_table_body">
+<tr class="gt_group_heading_row odd">
+<td colspan="2" id="Period 1 (steps 1–24)" class="gt_group_heading" data-quarto-table-cell-role="th" scope="colgroup">Period 1 (steps 1–24)</td>
+</tr>
+<tr class="gt_row_group_first even">
+<td class="gt_row gt_right" headers="Period 1 (steps 1–24)  Step">1</td>
+<td class="gt_row gt_right" headers="Period 1 (steps 1–24)  Fₙ mod 9" style="background-color: #F5E642; color: #000000">1</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="Period 1 (steps 1–24)  Step">2</td>
+<td class="gt_row gt_right" headers="Period 1 (steps 1–24)  Fₙ mod 9" style="background-color: #F5E642; color: #000000">1</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="Period 1 (steps 1–24)  Step">3</td>
+<td class="gt_row gt_right" headers="Period 1 (steps 1–24)  Fₙ mod 9" style="background-color: #FFFFFF; color: #000000">2</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="Period 1 (steps 1–24)  Step">4</td>
+<td class="gt_row gt_right" headers="Period 1 (steps 1–24)  Fₙ mod 9" style="background-color: #5B9BD5; color: #FFFFFF">3</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="Period 1 (steps 1–24)  Step">5</td>
+<td class="gt_row gt_right" headers="Period 1 (steps 1–24)  Fₙ mod 9" style="background-color: #FFFFFF; color: #000000">5</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="Period 1 (steps 1–24)  Step">6</td>
+<td class="gt_row gt_right" headers="Period 1 (steps 1–24)  Fₙ mod 9" style="background-color: #FFFFFF; color: #000000">8</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="Period 1 (steps 1–24)  Step">7</td>
+<td class="gt_row gt_right" headers="Period 1 (steps 1–24)  Fₙ mod 9" style="background-color: #FFFFFF; color: #000000">4</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="Period 1 (steps 1–24)  Step">8</td>
+<td class="gt_row gt_right" headers="Period 1 (steps 1–24)  Fₙ mod 9" style="background-color: #5B9BD5; color: #FFFFFF">3</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="Period 1 (steps 1–24)  Step">9</td>
+<td class="gt_row gt_right" headers="Period 1 (steps 1–24)  Fₙ mod 9" style="background-color: #5AAE61; color: #FFFFFF">7</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="Period 1 (steps 1–24)  Step">10</td>
+<td class="gt_row gt_right" headers="Period 1 (steps 1–24)  Fₙ mod 9" style="background-color: #F5E642; color: #000000">1</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="Period 1 (steps 1–24)  Step">11</td>
+<td class="gt_row gt_right" headers="Period 1 (steps 1–24)  Fₙ mod 9" style="background-color: #FFFFFF; color: #000000">8</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="Period 1 (steps 1–24)  Step">12</td>
+<td class="gt_row gt_right" headers="Period 1 (steps 1–24)  Fₙ mod 9" style="background-color: #8064A2; color: #FFFFFF">9</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="Period 1 (steps 1–24)  Step">13</td>
+<td class="gt_row gt_right" headers="Period 1 (steps 1–24)  Fₙ mod 9" style="background-color: #FFFFFF; color: #000000">8</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="Period 1 (steps 1–24)  Step">14</td>
+<td class="gt_row gt_right" headers="Period 1 (steps 1–24)  Fₙ mod 9" style="background-color: #FFFFFF; color: #000000">8</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="Period 1 (steps 1–24)  Step">15</td>
+<td class="gt_row gt_right" headers="Period 1 (steps 1–24)  Fₙ mod 9" style="background-color: #5AAE61; color: #FFFFFF">7</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="Period 1 (steps 1–24)  Step">16</td>
+<td class="gt_row gt_right" headers="Period 1 (steps 1–24)  Fₙ mod 9" style="background-color: #E05C4B; color: #FFFFFF">6</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="Period 1 (steps 1–24)  Step">17</td>
+<td class="gt_row gt_right" headers="Period 1 (steps 1–24)  Fₙ mod 9" style="background-color: #FFFFFF; color: #000000">4</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="Period 1 (steps 1–24)  Step">18</td>
+<td class="gt_row gt_right" headers="Period 1 (steps 1–24)  Fₙ mod 9" style="background-color: #F5E642; color: #000000">1</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="Period 1 (steps 1–24)  Step">19</td>
+<td class="gt_row gt_right" headers="Period 1 (steps 1–24)  Fₙ mod 9" style="background-color: #FFFFFF; color: #000000">5</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="Period 1 (steps 1–24)  Step">20</td>
+<td class="gt_row gt_right" headers="Period 1 (steps 1–24)  Fₙ mod 9" style="background-color: #E05C4B; color: #FFFFFF">6</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="Period 1 (steps 1–24)  Step">21</td>
+<td class="gt_row gt_right" headers="Period 1 (steps 1–24)  Fₙ mod 9" style="background-color: #FFFFFF; color: #000000">2</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="Period 1 (steps 1–24)  Step">22</td>
+<td class="gt_row gt_right" headers="Period 1 (steps 1–24)  Fₙ mod 9" style="background-color: #FFFFFF; color: #000000">8</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="Period 1 (steps 1–24)  Step">23</td>
+<td class="gt_row gt_right" headers="Period 1 (steps 1–24)  Fₙ mod 9" style="background-color: #F5E642; color: #000000">1</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="Period 1 (steps 1–24)  Step">24</td>
+<td class="gt_row gt_right" headers="Period 1 (steps 1–24)  Fₙ mod 9" style="background-color: #8064A2; color: #FFFFFF">9</td>
+</tr>
+<tr class="gt_group_heading_row even">
+<td colspan="2" id="Period 2 (steps 25–48)" class="gt_group_heading" data-quarto-table-cell-role="th" scope="colgroup">Period 2 (steps 25–48)</td>
+</tr>
+<tr class="gt_row_group_first odd">
+<td class="gt_row gt_right" headers="Period 2 (steps 25–48)  Step">25</td>
+<td class="gt_row gt_right" headers="Period 2 (steps 25–48)  Fₙ mod 9" style="background-color: #F5E642; color: #000000">1</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="Period 2 (steps 25–48)  Step">26</td>
+<td class="gt_row gt_right" headers="Period 2 (steps 25–48)  Fₙ mod 9" style="background-color: #F5E642; color: #000000">1</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="Period 2 (steps 25–48)  Step">27</td>
+<td class="gt_row gt_right" headers="Period 2 (steps 25–48)  Fₙ mod 9" style="background-color: #FFFFFF; color: #000000">2</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="Period 2 (steps 25–48)  Step">28</td>
+<td class="gt_row gt_right" headers="Period 2 (steps 25–48)  Fₙ mod 9" style="background-color: #5B9BD5; color: #FFFFFF">3</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="Period 2 (steps 25–48)  Step">29</td>
+<td class="gt_row gt_right" headers="Period 2 (steps 25–48)  Fₙ mod 9" style="background-color: #FFFFFF; color: #000000">5</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="Period 2 (steps 25–48)  Step">30</td>
+<td class="gt_row gt_right" headers="Period 2 (steps 25–48)  Fₙ mod 9" style="background-color: #FFFFFF; color: #000000">8</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="Period 2 (steps 25–48)  Step">31</td>
+<td class="gt_row gt_right" headers="Period 2 (steps 25–48)  Fₙ mod 9" style="background-color: #FFFFFF; color: #000000">4</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="Period 2 (steps 25–48)  Step">32</td>
+<td class="gt_row gt_right" headers="Period 2 (steps 25–48)  Fₙ mod 9" style="background-color: #5B9BD5; color: #FFFFFF">3</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="Period 2 (steps 25–48)  Step">33</td>
+<td class="gt_row gt_right" headers="Period 2 (steps 25–48)  Fₙ mod 9" style="background-color: #5AAE61; color: #FFFFFF">7</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="Period 2 (steps 25–48)  Step">34</td>
+<td class="gt_row gt_right" headers="Period 2 (steps 25–48)  Fₙ mod 9" style="background-color: #F5E642; color: #000000">1</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="Period 2 (steps 25–48)  Step">35</td>
+<td class="gt_row gt_right" headers="Period 2 (steps 25–48)  Fₙ mod 9" style="background-color: #FFFFFF; color: #000000">8</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="Period 2 (steps 25–48)  Step">36</td>
+<td class="gt_row gt_right" headers="Period 2 (steps 25–48)  Fₙ mod 9" style="background-color: #8064A2; color: #FFFFFF">9</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="Period 2 (steps 25–48)  Step">37</td>
+<td class="gt_row gt_right" headers="Period 2 (steps 25–48)  Fₙ mod 9" style="background-color: #FFFFFF; color: #000000">8</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="Period 2 (steps 25–48)  Step">38</td>
+<td class="gt_row gt_right" headers="Period 2 (steps 25–48)  Fₙ mod 9" style="background-color: #FFFFFF; color: #000000">8</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="Period 2 (steps 25–48)  Step">39</td>
+<td class="gt_row gt_right" headers="Period 2 (steps 25–48)  Fₙ mod 9" style="background-color: #5AAE61; color: #FFFFFF">7</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="Period 2 (steps 25–48)  Step">40</td>
+<td class="gt_row gt_right" headers="Period 2 (steps 25–48)  Fₙ mod 9" style="background-color: #E05C4B; color: #FFFFFF">6</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="Period 2 (steps 25–48)  Step">41</td>
+<td class="gt_row gt_right" headers="Period 2 (steps 25–48)  Fₙ mod 9" style="background-color: #FFFFFF; color: #000000">4</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="Period 2 (steps 25–48)  Step">42</td>
+<td class="gt_row gt_right" headers="Period 2 (steps 25–48)  Fₙ mod 9" style="background-color: #F5E642; color: #000000">1</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="Period 2 (steps 25–48)  Step">43</td>
+<td class="gt_row gt_right" headers="Period 2 (steps 25–48)  Fₙ mod 9" style="background-color: #FFFFFF; color: #000000">5</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="Period 2 (steps 25–48)  Step">44</td>
+<td class="gt_row gt_right" headers="Period 2 (steps 25–48)  Fₙ mod 9" style="background-color: #E05C4B; color: #FFFFFF">6</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="Period 2 (steps 25–48)  Step">45</td>
+<td class="gt_row gt_right" headers="Period 2 (steps 25–48)  Fₙ mod 9" style="background-color: #FFFFFF; color: #000000">2</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="Period 2 (steps 25–48)  Step">46</td>
+<td class="gt_row gt_right" headers="Period 2 (steps 25–48)  Fₙ mod 9" style="background-color: #FFFFFF; color: #000000">8</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="Period 2 (steps 25–48)  Step">47</td>
+<td class="gt_row gt_right" headers="Period 2 (steps 25–48)  Fₙ mod 9" style="background-color: #F5E642; color: #000000">1</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="Period 2 (steps 25–48)  Step">48</td>
+<td class="gt_row gt_right" headers="Period 2 (steps 25–48)  Fₙ mod 9" style="background-color: #8064A2; color: #FFFFFF">9</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>The pair sequence confirms the cycle:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>orbit_df <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">step    =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">24</span>,</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  Fₙ      <span class="ot">=</span> seq48[<span class="dv">1</span><span class="sc">:</span><span class="dv">24</span>],</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Fₙ₊₁</span><span class="st">`</span> <span class="ot">=</span> seq48[<span class="dv">2</span><span class="sc">:</span><span class="dv">25</span>]</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">Product dr</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">digital_root</span>(Fₙ <span class="sc">*</span> <span class="st">`</span><span class="at">Fₙ₊₁</span><span class="st">`</span>),</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">Grid cell</span><span class="st">`</span>  <span class="ot">=</span> <span class="fu">paste0</span>(<span class="st">"("</span>, Fₙ, <span class="st">", "</span>, <span class="st">`</span><span class="at">Fₙ₊₁</span><span class="st">`</span>, <span class="st">")"</span>)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>orbit_df <span class="sc">|&gt;</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gt</span>() <span class="sc">|&gt;</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tab_header</span>(</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">title    =</span> <span class="st">"The 24 Consecutive Pairs (Fₙ, Fₙ₊₁) mod 9"</span>,</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"Each pair is a unique cell on the grid — none repeats until step 25"</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data_color</span>(</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">columns =</span> <span class="st">`</span><span class="at">Product dr</span><span class="st">`</span>,</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">method  =</span> <span class="st">"factor"</span>,</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">palette =</span> <span class="fu">unname</span>(dr_colors[<span class="fu">as.character</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">9</span>)])</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cols_label</span>(<span class="at">step =</span> <span class="st">"Step"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="akrqmaxrph" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#akrqmaxrph table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#akrqmaxrph thead, #akrqmaxrph tbody, #akrqmaxrph tfoot, #akrqmaxrph tr, #akrqmaxrph td, #akrqmaxrph th {
+  border-style: none;
+}
+
+#akrqmaxrph p {
+  margin: 0;
+  padding: 0;
+}
+
+#akrqmaxrph .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#akrqmaxrph .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#akrqmaxrph .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#akrqmaxrph .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#akrqmaxrph .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#akrqmaxrph .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#akrqmaxrph .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#akrqmaxrph .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#akrqmaxrph .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#akrqmaxrph .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#akrqmaxrph .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#akrqmaxrph .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#akrqmaxrph .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#akrqmaxrph .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#akrqmaxrph .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#akrqmaxrph .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#akrqmaxrph .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#akrqmaxrph .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#akrqmaxrph .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#akrqmaxrph .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#akrqmaxrph .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#akrqmaxrph .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#akrqmaxrph .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#akrqmaxrph .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#akrqmaxrph .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#akrqmaxrph .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#akrqmaxrph .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#akrqmaxrph .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#akrqmaxrph .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#akrqmaxrph .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#akrqmaxrph .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#akrqmaxrph .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#akrqmaxrph .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#akrqmaxrph .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#akrqmaxrph .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#akrqmaxrph .gt_left {
+  text-align: left;
+}
+
+#akrqmaxrph .gt_center {
+  text-align: center;
+}
+
+#akrqmaxrph .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#akrqmaxrph .gt_font_normal {
+  font-weight: normal;
+}
+
+#akrqmaxrph .gt_font_bold {
+  font-weight: bold;
+}
+
+#akrqmaxrph .gt_font_italic {
+  font-style: italic;
+}
+
+#akrqmaxrph .gt_super {
+  font-size: 65%;
+}
+
+#akrqmaxrph .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#akrqmaxrph .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#akrqmaxrph .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#akrqmaxrph .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#akrqmaxrph .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#akrqmaxrph .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#akrqmaxrph .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#akrqmaxrph .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#akrqmaxrph div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+
+<table class="gt_table caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+<thead>
+<tr class="gt_heading header">
+<th colspan="5" class="gt_heading gt_title gt_font_normal">The 24 Consecutive Pairs (Fₙ, Fₙ₊₁) mod 9</th>
+</tr>
+<tr class="gt_heading even">
+<th colspan="5" class="gt_heading gt_subtitle gt_font_normal gt_bottom_border">Each pair is a unique cell on the grid — none repeats until step 25</th>
+</tr>
+<tr class="gt_col_headings header">
+<th id="step" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Step</th>
+<th id="Fₙ" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Fₙ</th>
+<th id="Fₙ₊₁" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Fₙ₊₁</th>
+<th id="Product-dr" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Product dr</th>
+<th id="Grid-cell" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Grid cell</th>
+</tr>
+</thead>
+<tbody class="gt_table_body">
+<tr class="odd">
+<td class="gt_row gt_right" headers="step">1</td>
+<td class="gt_row gt_right" headers="Fₙ">1</td>
+<td class="gt_row gt_right" headers="Fₙ₊₁">1</td>
+<td class="gt_row gt_right" headers="Product dr" style="background-color: #F5E642; color: #000000">1</td>
+<td class="gt_row gt_right" headers="Grid cell">(1, 1)</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="step">2</td>
+<td class="gt_row gt_right" headers="Fₙ">1</td>
+<td class="gt_row gt_right" headers="Fₙ₊₁">2</td>
+<td class="gt_row gt_right" headers="Product dr" style="background-color: #FFFFFF; color: #000000">2</td>
+<td class="gt_row gt_right" headers="Grid cell">(1, 2)</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="step">3</td>
+<td class="gt_row gt_right" headers="Fₙ">2</td>
+<td class="gt_row gt_right" headers="Fₙ₊₁">3</td>
+<td class="gt_row gt_right" headers="Product dr" style="background-color: #E05C4B; color: #FFFFFF">6</td>
+<td class="gt_row gt_right" headers="Grid cell">(2, 3)</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="step">4</td>
+<td class="gt_row gt_right" headers="Fₙ">3</td>
+<td class="gt_row gt_right" headers="Fₙ₊₁">5</td>
+<td class="gt_row gt_right" headers="Product dr" style="background-color: #E05C4B; color: #FFFFFF">6</td>
+<td class="gt_row gt_right" headers="Grid cell">(3, 5)</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="step">5</td>
+<td class="gt_row gt_right" headers="Fₙ">5</td>
+<td class="gt_row gt_right" headers="Fₙ₊₁">8</td>
+<td class="gt_row gt_right" headers="Product dr" style="background-color: #FFFFFF; color: #000000">4</td>
+<td class="gt_row gt_right" headers="Grid cell">(5, 8)</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="step">6</td>
+<td class="gt_row gt_right" headers="Fₙ">8</td>
+<td class="gt_row gt_right" headers="Fₙ₊₁">4</td>
+<td class="gt_row gt_right" headers="Product dr" style="background-color: #FFFFFF; color: #000000">5</td>
+<td class="gt_row gt_right" headers="Grid cell">(8, 4)</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="step">7</td>
+<td class="gt_row gt_right" headers="Fₙ">4</td>
+<td class="gt_row gt_right" headers="Fₙ₊₁">3</td>
+<td class="gt_row gt_right" headers="Product dr" style="background-color: #5B9BD5; color: #FFFFFF">3</td>
+<td class="gt_row gt_right" headers="Grid cell">(4, 3)</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="step">8</td>
+<td class="gt_row gt_right" headers="Fₙ">3</td>
+<td class="gt_row gt_right" headers="Fₙ₊₁">7</td>
+<td class="gt_row gt_right" headers="Product dr" style="background-color: #5B9BD5; color: #FFFFFF">3</td>
+<td class="gt_row gt_right" headers="Grid cell">(3, 7)</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="step">9</td>
+<td class="gt_row gt_right" headers="Fₙ">7</td>
+<td class="gt_row gt_right" headers="Fₙ₊₁">1</td>
+<td class="gt_row gt_right" headers="Product dr" style="background-color: #5AAE61; color: #FFFFFF">7</td>
+<td class="gt_row gt_right" headers="Grid cell">(7, 1)</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="step">10</td>
+<td class="gt_row gt_right" headers="Fₙ">1</td>
+<td class="gt_row gt_right" headers="Fₙ₊₁">8</td>
+<td class="gt_row gt_right" headers="Product dr" style="background-color: #FFFFFF; color: #000000">8</td>
+<td class="gt_row gt_right" headers="Grid cell">(1, 8)</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="step">11</td>
+<td class="gt_row gt_right" headers="Fₙ">8</td>
+<td class="gt_row gt_right" headers="Fₙ₊₁">9</td>
+<td class="gt_row gt_right" headers="Product dr" style="background-color: #8064A2; color: #FFFFFF">9</td>
+<td class="gt_row gt_right" headers="Grid cell">(8, 9)</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="step">12</td>
+<td class="gt_row gt_right" headers="Fₙ">9</td>
+<td class="gt_row gt_right" headers="Fₙ₊₁">8</td>
+<td class="gt_row gt_right" headers="Product dr" style="background-color: #8064A2; color: #FFFFFF">9</td>
+<td class="gt_row gt_right" headers="Grid cell">(9, 8)</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="step">13</td>
+<td class="gt_row gt_right" headers="Fₙ">8</td>
+<td class="gt_row gt_right" headers="Fₙ₊₁">8</td>
+<td class="gt_row gt_right" headers="Product dr" style="background-color: #F5E642; color: #000000">1</td>
+<td class="gt_row gt_right" headers="Grid cell">(8, 8)</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="step">14</td>
+<td class="gt_row gt_right" headers="Fₙ">8</td>
+<td class="gt_row gt_right" headers="Fₙ₊₁">7</td>
+<td class="gt_row gt_right" headers="Product dr" style="background-color: #FFFFFF; color: #000000">2</td>
+<td class="gt_row gt_right" headers="Grid cell">(8, 7)</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="step">15</td>
+<td class="gt_row gt_right" headers="Fₙ">7</td>
+<td class="gt_row gt_right" headers="Fₙ₊₁">6</td>
+<td class="gt_row gt_right" headers="Product dr" style="background-color: #E05C4B; color: #FFFFFF">6</td>
+<td class="gt_row gt_right" headers="Grid cell">(7, 6)</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="step">16</td>
+<td class="gt_row gt_right" headers="Fₙ">6</td>
+<td class="gt_row gt_right" headers="Fₙ₊₁">4</td>
+<td class="gt_row gt_right" headers="Product dr" style="background-color: #E05C4B; color: #FFFFFF">6</td>
+<td class="gt_row gt_right" headers="Grid cell">(6, 4)</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="step">17</td>
+<td class="gt_row gt_right" headers="Fₙ">4</td>
+<td class="gt_row gt_right" headers="Fₙ₊₁">1</td>
+<td class="gt_row gt_right" headers="Product dr" style="background-color: #FFFFFF; color: #000000">4</td>
+<td class="gt_row gt_right" headers="Grid cell">(4, 1)</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="step">18</td>
+<td class="gt_row gt_right" headers="Fₙ">1</td>
+<td class="gt_row gt_right" headers="Fₙ₊₁">5</td>
+<td class="gt_row gt_right" headers="Product dr" style="background-color: #FFFFFF; color: #000000">5</td>
+<td class="gt_row gt_right" headers="Grid cell">(1, 5)</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="step">19</td>
+<td class="gt_row gt_right" headers="Fₙ">5</td>
+<td class="gt_row gt_right" headers="Fₙ₊₁">6</td>
+<td class="gt_row gt_right" headers="Product dr" style="background-color: #5B9BD5; color: #FFFFFF">3</td>
+<td class="gt_row gt_right" headers="Grid cell">(5, 6)</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="step">20</td>
+<td class="gt_row gt_right" headers="Fₙ">6</td>
+<td class="gt_row gt_right" headers="Fₙ₊₁">2</td>
+<td class="gt_row gt_right" headers="Product dr" style="background-color: #5B9BD5; color: #FFFFFF">3</td>
+<td class="gt_row gt_right" headers="Grid cell">(6, 2)</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="step">21</td>
+<td class="gt_row gt_right" headers="Fₙ">2</td>
+<td class="gt_row gt_right" headers="Fₙ₊₁">8</td>
+<td class="gt_row gt_right" headers="Product dr" style="background-color: #5AAE61; color: #FFFFFF">7</td>
+<td class="gt_row gt_right" headers="Grid cell">(2, 8)</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="step">22</td>
+<td class="gt_row gt_right" headers="Fₙ">8</td>
+<td class="gt_row gt_right" headers="Fₙ₊₁">1</td>
+<td class="gt_row gt_right" headers="Product dr" style="background-color: #FFFFFF; color: #000000">8</td>
+<td class="gt_row gt_right" headers="Grid cell">(8, 1)</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="step">23</td>
+<td class="gt_row gt_right" headers="Fₙ">1</td>
+<td class="gt_row gt_right" headers="Fₙ₊₁">9</td>
+<td class="gt_row gt_right" headers="Product dr" style="background-color: #8064A2; color: #FFFFFF">9</td>
+<td class="gt_row gt_right" headers="Grid cell">(1, 9)</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="step">24</td>
+<td class="gt_row gt_right" headers="Fₙ">9</td>
+<td class="gt_row gt_right" headers="Fₙ₊₁">1</td>
+<td class="gt_row gt_right" headers="Product dr" style="background-color: #8064A2; color: #FFFFFF">9</td>
+<td class="gt_row gt_right" headers="Grid cell">(9, 1)</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<hr>
+</section>
+<section id="the-orbit-on-the-grid" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="the-orbit-on-the-grid"><span class="header-section-number">6</span> The Orbit on the Grid</h2>
+<p>Each pair (Fₙ mod 9, Fₙ₊₁ mod 9) locates a cell on the grid: <strong>row = Fₙ mod 9</strong>, <strong>column = Fₙ₊₁ mod 9</strong>. Plotting all 24 consecutive pairs and connecting them in order traces the orbit.</p>
+<p>The <strong>node color</strong> reflects the digital root of the cell’s product (row × col) — i.e., the color of the cell in the grid behind it.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>orbit_arrows <span class="ot">&lt;-</span> orbit_df <span class="sc">|&gt;</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">next_row =</span> <span class="fu">c</span>(Fₙ[<span class="sc">-</span><span class="dv">1</span>],      Fₙ[<span class="dv">1</span>]),</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">next_col =</span> <span class="fu">c</span>(<span class="st">`</span><span class="at">Fₙ₊₁</span><span class="st">`</span>[<span class="sc">-</span><span class="dv">1</span>], <span class="st">`</span><span class="at">Fₙ₊₁</span><span class="st">`</span>[<span class="dv">1</span>])</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="co"># faint grid background</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>(<span class="at">data =</span> grid_df,</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>            <span class="fu">aes</span>(<span class="at">x =</span> col, <span class="at">y =</span> row, <span class="at">fill =</span> <span class="fu">factor</span>(dr)),</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>            <span class="at">color =</span> <span class="st">"black"</span>, <span class="at">linewidth =</span> <span class="fl">0.3</span>, <span class="at">alpha =</span> <span class="fl">0.25</span>) <span class="sc">+</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>  <span class="co"># arrows connecting consecutive orbit steps</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="at">data =</span> orbit_arrows,</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>               <span class="fu">aes</span>(<span class="at">x =</span> <span class="st">`</span><span class="at">Fₙ₊₁</span><span class="st">`</span>, <span class="at">y =</span> Fₙ, <span class="at">xend =</span> next_col, <span class="at">yend =</span> next_row),</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>               <span class="at">arrow     =</span> <span class="fu">arrow</span>(<span class="at">length =</span> <span class="fu">unit</span>(<span class="fl">0.18</span>, <span class="st">"cm"</span>), <span class="at">type =</span> <span class="st">"closed"</span>),</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>               <span class="at">linewidth =</span> <span class="fl">0.45</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>  <span class="co"># orbit nodes (colored by product digital root)</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data =</span> orbit_df,</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>             <span class="fu">aes</span>(<span class="at">x =</span> <span class="st">`</span><span class="at">Fₙ₊₁</span><span class="st">`</span>, <span class="at">y =</span> Fₙ, <span class="at">fill =</span> <span class="fu">factor</span>(<span class="st">`</span><span class="at">Product dr</span><span class="st">`</span>)),</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>             <span class="at">shape =</span> <span class="dv">21</span>, <span class="at">size =</span> <span class="dv">10</span>, <span class="at">color =</span> <span class="st">"black"</span>, <span class="at">stroke =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="at">data =</span> orbit_df,</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>            <span class="fu">aes</span>(<span class="at">x =</span> <span class="st">`</span><span class="at">Fₙ₊₁</span><span class="st">`</span>, <span class="at">y =</span> Fₙ, <span class="at">label =</span> step),</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>            <span class="at">size =</span> <span class="dv">3</span>, <span class="at">fontface =</span> <span class="st">"bold"</span>) <span class="sc">+</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">values =</span> dr_colors,</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">name   =</span> <span class="st">"Product</span><span class="sc">\n</span><span class="st">digital root"</span>,</span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">breaks =</span> <span class="fu">c</span>(<span class="st">"1"</span>, <span class="st">"3"</span>, <span class="st">"6"</span>, <span class="st">"7"</span>, <span class="st">"9"</span>),</span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"1 (yellow)"</span>, <span class="st">"3 (blue)"</span>, <span class="st">"6 (red)"</span>, <span class="st">"7 (green)"</span>, <span class="st">"9 (purple)"</span>)</span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">9</span>, <span class="at">expand =</span> <span class="fu">c</span>(.<span class="dv">1</span>, .<span class="dv">1</span>), <span class="at">position =</span> <span class="st">"top"</span>) <span class="sc">+</span></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_reverse</span>(<span class="at">breaks =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">9</span>, <span class="at">expand =</span> <span class="fu">c</span>(.<span class="dv">1</span>, .<span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_fixed</span>() <span class="sc">+</span></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>    <span class="at">title    =</span> <span class="st">"The 24-Step Fibonacci Orbit on the Digital-Root Grid"</span>,</span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"Row = Fₙ mod 9 · Column = Fₙ₊₁ mod 9 · Node color = product digital root"</span>,</span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Column (Fₙ₊₁ mod 9)"</span>, <span class="at">y =</span> <span class="st">"Row (Fₙ mod 9)"</span></span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"right"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Fibonnacci-mod-9-root_files/figure-html/orbit-plot-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The orbit visits every colored region of the grid. The <strong>product digital root sequence</strong> along the orbit is:</p>
+<p><span class="math display">\[1,\ 2,\ 6,\ 6,\ 4,\ 5,\ 3,\ 3,\ 7,\ 8,\ 9,\ 9,\ 1,\ 2,\ 6,\ 6,\ 4,\ 5,\ 3,\ 3,\ 7,\ 8,\ 9,\ 9\]</span></p>
+<p>The first 12 values are identical to the last 12 — the color pattern repeats exactly at the halfway point.</p>
+<hr>
+</section>
+<section id="the-12-step-symmetry" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="the-12-step-symmetry"><span class="header-section-number">7</span> The 12-Step Symmetry</h2>
+<p>Why does the color pattern repeat after 12 steps instead of 24? The answer lies in a key algebraic property:</p>
+<p><span class="math display">\[F_{n+12} \equiv -F_n \pmod{9}\]</span></p>
+<p>In the 1–9 representation this means <span class="math inline">\(F_{n+12} = 9 - F_n\)</span> (for <span class="math inline">\(F_n \neq 9\)</span>; a value of 9 stays 9). So each pair at step <span class="math inline">\(n+12\)</span> is the <strong>element-wise negation</strong> of the pair at step <span class="math inline">\(n\)</span>:</p>
+<p><span class="math display">\[(F_{n+12},\ F_{n+13}) \equiv (-F_n,\ -F_{n+1}) \pmod{9}\]</span></p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tibble</span>(</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">Step     =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>,</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Pair (step n)</span><span class="st">`</span>    <span class="ot">=</span> <span class="fu">paste0</span>(<span class="st">"("</span>, orbit_df<span class="sc">$</span>Fₙ[<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>], <span class="st">", "</span>, orbit_df<span class="sc">$</span><span class="st">`</span><span class="at">Fₙ₊₁</span><span class="st">`</span>[<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>], <span class="st">")"</span>),</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Pair (step n+12)</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">paste0</span>(<span class="st">"("</span>, orbit_df<span class="sc">$</span>Fₙ[<span class="dv">13</span><span class="sc">:</span><span class="dv">24</span>], <span class="st">", "</span>, orbit_df<span class="sc">$</span><span class="st">`</span><span class="at">Fₙ₊₁</span><span class="st">`</span>[<span class="dv">13</span><span class="sc">:</span><span class="dv">24</span>], <span class="st">")"</span>),</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Sum</span><span class="st">`</span>              <span class="ot">=</span> orbit_df<span class="sc">$</span>Fₙ[<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>] <span class="sc">+</span> orbit_df<span class="sc">$</span>Fₙ[<span class="dv">13</span><span class="sc">:</span><span class="dv">24</span>],</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Product dr (n)</span><span class="st">`</span>   <span class="ot">=</span> orbit_df<span class="sc">$</span><span class="st">`</span><span class="at">Product dr</span><span class="st">`</span>[<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>],</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Product dr (n+12)</span><span class="st">`</span><span class="ot">=</span> orbit_df<span class="sc">$</span><span class="st">`</span><span class="at">Product dr</span><span class="st">`</span>[<span class="dv">13</span><span class="sc">:</span><span class="dv">24</span>]</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gt</span>() <span class="sc">|&gt;</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tab_header</span>(</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">title    =</span> <span class="st">"12-Step Symmetry"</span>,</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"Each pair at step n+12 is the negative of step n mod 9 — sums equal 9 (or 18 when both are 9)"</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data_color</span>(</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">columns  =</span> <span class="st">`</span><span class="at">Product dr (n)</span><span class="st">`</span>,</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">method   =</span> <span class="st">"factor"</span>,</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">palette  =</span> <span class="fu">unname</span>(dr_colors[<span class="fu">as.character</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">9</span>)])</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data_color</span>(</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">columns  =</span> <span class="st">`</span><span class="at">Product dr (n+12)</span><span class="st">`</span>,</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">method   =</span> <span class="st">"factor"</span>,</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">palette  =</span> <span class="fu">unname</span>(dr_colors[<span class="fu">as.character</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">9</span>)])</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="viqlvjqtlg" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#viqlvjqtlg table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#viqlvjqtlg thead, #viqlvjqtlg tbody, #viqlvjqtlg tfoot, #viqlvjqtlg tr, #viqlvjqtlg td, #viqlvjqtlg th {
+  border-style: none;
+}
+
+#viqlvjqtlg p {
+  margin: 0;
+  padding: 0;
+}
+
+#viqlvjqtlg .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#viqlvjqtlg .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#viqlvjqtlg .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#viqlvjqtlg .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#viqlvjqtlg .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#viqlvjqtlg .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#viqlvjqtlg .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#viqlvjqtlg .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#viqlvjqtlg .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#viqlvjqtlg .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#viqlvjqtlg .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#viqlvjqtlg .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#viqlvjqtlg .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#viqlvjqtlg .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#viqlvjqtlg .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#viqlvjqtlg .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#viqlvjqtlg .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#viqlvjqtlg .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#viqlvjqtlg .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#viqlvjqtlg .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#viqlvjqtlg .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#viqlvjqtlg .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#viqlvjqtlg .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#viqlvjqtlg .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#viqlvjqtlg .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#viqlvjqtlg .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#viqlvjqtlg .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#viqlvjqtlg .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#viqlvjqtlg .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#viqlvjqtlg .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#viqlvjqtlg .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#viqlvjqtlg .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#viqlvjqtlg .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#viqlvjqtlg .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#viqlvjqtlg .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#viqlvjqtlg .gt_left {
+  text-align: left;
+}
+
+#viqlvjqtlg .gt_center {
+  text-align: center;
+}
+
+#viqlvjqtlg .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#viqlvjqtlg .gt_font_normal {
+  font-weight: normal;
+}
+
+#viqlvjqtlg .gt_font_bold {
+  font-weight: bold;
+}
+
+#viqlvjqtlg .gt_font_italic {
+  font-style: italic;
+}
+
+#viqlvjqtlg .gt_super {
+  font-size: 65%;
+}
+
+#viqlvjqtlg .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#viqlvjqtlg .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#viqlvjqtlg .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#viqlvjqtlg .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#viqlvjqtlg .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#viqlvjqtlg .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#viqlvjqtlg .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#viqlvjqtlg .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#viqlvjqtlg div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+
+<table class="gt_table caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+<thead>
+<tr class="gt_heading header">
+<th colspan="6" class="gt_heading gt_title gt_font_normal">12-Step Symmetry</th>
+</tr>
+<tr class="gt_heading even">
+<th colspan="6" class="gt_heading gt_subtitle gt_font_normal gt_bottom_border">Each pair at step n+12 is the negative of step n mod 9 — sums equal 9 (or 18 when both are 9)</th>
+</tr>
+<tr class="gt_col_headings header">
+<th id="Step" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Step</th>
+<th id="Pair-(step-n)" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Pair (step n)</th>
+<th id="Pair-(step-n+12)" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Pair (step n+12)</th>
+<th id="Sum" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Sum</th>
+<th id="Product-dr-(n)" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Product dr (n)</th>
+<th id="Product-dr-(n+12)" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Product dr (n+12)</th>
+</tr>
+</thead>
+<tbody class="gt_table_body">
+<tr class="odd">
+<td class="gt_row gt_right" headers="Step">1</td>
+<td class="gt_row gt_right" headers="Pair (step n)">(1, 1)</td>
+<td class="gt_row gt_right" headers="Pair (step n+12)">(8, 8)</td>
+<td class="gt_row gt_right" headers="Sum">9</td>
+<td class="gt_row gt_right" headers="Product dr (n)" style="background-color: #F5E642; color: #000000">1</td>
+<td class="gt_row gt_right" headers="Product dr (n+12)" style="background-color: #F5E642; color: #000000">1</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="Step">2</td>
+<td class="gt_row gt_right" headers="Pair (step n)">(1, 2)</td>
+<td class="gt_row gt_right" headers="Pair (step n+12)">(8, 7)</td>
+<td class="gt_row gt_right" headers="Sum">9</td>
+<td class="gt_row gt_right" headers="Product dr (n)" style="background-color: #FFFFFF; color: #000000">2</td>
+<td class="gt_row gt_right" headers="Product dr (n+12)" style="background-color: #FFFFFF; color: #000000">2</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="Step">3</td>
+<td class="gt_row gt_right" headers="Pair (step n)">(2, 3)</td>
+<td class="gt_row gt_right" headers="Pair (step n+12)">(7, 6)</td>
+<td class="gt_row gt_right" headers="Sum">9</td>
+<td class="gt_row gt_right" headers="Product dr (n)" style="background-color: #E05C4B; color: #FFFFFF">6</td>
+<td class="gt_row gt_right" headers="Product dr (n+12)" style="background-color: #E05C4B; color: #FFFFFF">6</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="Step">4</td>
+<td class="gt_row gt_right" headers="Pair (step n)">(3, 5)</td>
+<td class="gt_row gt_right" headers="Pair (step n+12)">(6, 4)</td>
+<td class="gt_row gt_right" headers="Sum">9</td>
+<td class="gt_row gt_right" headers="Product dr (n)" style="background-color: #E05C4B; color: #FFFFFF">6</td>
+<td class="gt_row gt_right" headers="Product dr (n+12)" style="background-color: #E05C4B; color: #FFFFFF">6</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="Step">5</td>
+<td class="gt_row gt_right" headers="Pair (step n)">(5, 8)</td>
+<td class="gt_row gt_right" headers="Pair (step n+12)">(4, 1)</td>
+<td class="gt_row gt_right" headers="Sum">9</td>
+<td class="gt_row gt_right" headers="Product dr (n)" style="background-color: #FFFFFF; color: #000000">4</td>
+<td class="gt_row gt_right" headers="Product dr (n+12)" style="background-color: #FFFFFF; color: #000000">4</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="Step">6</td>
+<td class="gt_row gt_right" headers="Pair (step n)">(8, 4)</td>
+<td class="gt_row gt_right" headers="Pair (step n+12)">(1, 5)</td>
+<td class="gt_row gt_right" headers="Sum">9</td>
+<td class="gt_row gt_right" headers="Product dr (n)" style="background-color: #FFFFFF; color: #000000">5</td>
+<td class="gt_row gt_right" headers="Product dr (n+12)" style="background-color: #FFFFFF; color: #000000">5</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="Step">7</td>
+<td class="gt_row gt_right" headers="Pair (step n)">(4, 3)</td>
+<td class="gt_row gt_right" headers="Pair (step n+12)">(5, 6)</td>
+<td class="gt_row gt_right" headers="Sum">9</td>
+<td class="gt_row gt_right" headers="Product dr (n)" style="background-color: #5B9BD5; color: #FFFFFF">3</td>
+<td class="gt_row gt_right" headers="Product dr (n+12)" style="background-color: #5B9BD5; color: #FFFFFF">3</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="Step">8</td>
+<td class="gt_row gt_right" headers="Pair (step n)">(3, 7)</td>
+<td class="gt_row gt_right" headers="Pair (step n+12)">(6, 2)</td>
+<td class="gt_row gt_right" headers="Sum">9</td>
+<td class="gt_row gt_right" headers="Product dr (n)" style="background-color: #5B9BD5; color: #FFFFFF">3</td>
+<td class="gt_row gt_right" headers="Product dr (n+12)" style="background-color: #5B9BD5; color: #FFFFFF">3</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="Step">9</td>
+<td class="gt_row gt_right" headers="Pair (step n)">(7, 1)</td>
+<td class="gt_row gt_right" headers="Pair (step n+12)">(2, 8)</td>
+<td class="gt_row gt_right" headers="Sum">9</td>
+<td class="gt_row gt_right" headers="Product dr (n)" style="background-color: #5AAE61; color: #FFFFFF">7</td>
+<td class="gt_row gt_right" headers="Product dr (n+12)" style="background-color: #5AAE61; color: #FFFFFF">7</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="Step">10</td>
+<td class="gt_row gt_right" headers="Pair (step n)">(1, 8)</td>
+<td class="gt_row gt_right" headers="Pair (step n+12)">(8, 1)</td>
+<td class="gt_row gt_right" headers="Sum">9</td>
+<td class="gt_row gt_right" headers="Product dr (n)" style="background-color: #FFFFFF; color: #000000">8</td>
+<td class="gt_row gt_right" headers="Product dr (n+12)" style="background-color: #FFFFFF; color: #000000">8</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="Step">11</td>
+<td class="gt_row gt_right" headers="Pair (step n)">(8, 9)</td>
+<td class="gt_row gt_right" headers="Pair (step n+12)">(1, 9)</td>
+<td class="gt_row gt_right" headers="Sum">9</td>
+<td class="gt_row gt_right" headers="Product dr (n)" style="background-color: #8064A2; color: #FFFFFF">9</td>
+<td class="gt_row gt_right" headers="Product dr (n+12)" style="background-color: #8064A2; color: #FFFFFF">9</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="Step">12</td>
+<td class="gt_row gt_right" headers="Pair (step n)">(9, 8)</td>
+<td class="gt_row gt_right" headers="Pair (step n+12)">(9, 1)</td>
+<td class="gt_row gt_right" headers="Sum">18</td>
+<td class="gt_row gt_right" headers="Product dr (n)" style="background-color: #8064A2; color: #FFFFFF">9</td>
+<td class="gt_row gt_right" headers="Product dr (n+12)" style="background-color: #8064A2; color: #FFFFFF">9</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>Since <span class="math inline">\((-a)(-b) = ab\)</span>, the product of a negated pair equals the product of the original pair. Therefore <span class="math inline">\(\text{dr}((-F_n)(-F_{n+1})) = \text{dr}(F_n \cdot F_{n+1})\)</span>, and <strong>the product digital roots — and hence node colors — are identical at steps <span class="math inline">\(n\)</span> and <span class="math inline">\(n + 12\)</span></strong>.</p>
+<p>This means the full 24-step orbit consists of two identical color sequences back to back, even though the actual cell locations differ.</p>
+<hr>
+</section>
+<section id="summary" class="level2" data-number="8">
+<h2 data-number="8" class="anchored" data-anchor-id="summary"><span class="header-section-number">8</span> Summary</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Property</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Pisano period π(9)</td>
+<td><strong>24</strong></td>
+</tr>
+<tr class="even">
+<td>Starting state</td>
+<td>(F₁, F₂) = (1, 1)</td>
+</tr>
+<tr class="odd">
+<td>Number of distinct grid cells visited</td>
+<td>24</td>
+</tr>
+<tr class="even">
+<td>Product digital-root sequence period</td>
+<td><strong>12</strong></td>
+</tr>
+<tr class="odd">
+<td>Cause of 12-step symmetry</td>
+<td><span class="math inline">\(F_{n+12} \equiv -F_n \pmod 9\)</span></td>
+</tr>
+</tbody>
+</table>
+<p>The Fibonacci sequence, reduced mod 9, is not random noise — it traces a perfectly closed, color-symmetric orbit that reflects deep multiplicative structure in modular arithmetic. The 9×9 digital-root grid makes that structure visible.</p>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
