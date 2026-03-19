@@ -1,0 +1,643 @@
+---
+title: "MicroGPT in R: A Tutorial"
+subtitle: "Building a tiny GPT from scratch in pure R"
+date: today
+author: Posit AI, Dan Killian
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    code-fold: false
+    theme: cosmo
+execute:
+  eval: true
+  echo: true
+  warning: false
+  message: false
+---
+
+## Overview
+
+This tutorial walks through `microgpt.R`, a line-by-line R translation of
+Andrej Karpathy's [`microgpt.py`](https://github.com/karpathy/microgpt).[^](Karpathy's own blog plost on it is at https://karpathy.github.io/2026/02/12/microgpt/) The
+goal is to train a small GPT-style language model *from scratch*, using no deep
+learning libraries — only base R and the `R6` package.
+
+By the end of the file, the model has learned enough about human names to
+hallucinate plausible new ones.
+
+The five major components are:
+
+| Section | What it does |
+|---|---|
+| **Tokenizer** | Maps characters ↔ integer IDs |
+| **Autograd** | Scalar `Value` nodes that track gradients |
+| **Architecture** | Linear layers, RMSNorm, multi-head attention, MLP |
+| **Optimizer** | Adam with linear learning-rate decay |
+| **Train / Infer** | Forward pass → loss → backward → weight update |
+
+---
+
+## 1. Dataset
+
+::: {.callout-important}
+## Run this chunk interactively
+
+This chunk downloads the data file and requires network access. Run it in
+RStudio before rendering, or just source `microgpt.R` directly which handles
+this automatically.
+:::
+
+```{r}
+#| label: dataset
+#| eval: false
+
+library(R6)
+set.seed(7391)
+
+docs <- readLines("Microgpt/names.txt", warn=F)
+docs <- docs[nchar(trimws(docs)) > 0]   # drop blank lines
+docs <- sample(docs)                     # shuffle
+cat(sprintf("num docs: %d\n", length(docs)))
+```
+
+```{r}
+#| label: dataset-setup
+#| echo: false
+
+library(R6)
+set.seed(7391)
+```
+
+The dataset is a list of ~32 000 human first names (one per line). Each name is
+a **document** — a short sequence of characters the model will learn to
+imitate.
+
+Shuffling before training is good practice: it prevents the model from learning
+spurious ordering effects.
+
+---
+
+## 2. Tokenizer
+
+::: {.callout-important}
+## Run this chunk interactively
+
+This chunk requires `docs` from the dataset chunk above.
+:::
+
+```{r}
+#| label: tokenizer
+#| eval: false
+
+uchars     <- sort(unique(strsplit(paste(docs, collapse = ""), "")[[1]]))
+BOS        <- length(uchars)        # "Beginning of Sequence" token id (0-based)
+vocab_size <- length(uchars) + 1L
+cat(sprintf("vocab size: %d\n", vocab_size))
+```
+
+```{r}
+#| label: tokenizer-setup
+#| echo: false
+
+# names.txt contains only lowercase a–z, so vocab = 26 letters + 1 BOS token
+uchars     <- letters
+BOS        <- 26L
+vocab_size <- 27L
+```
+
+This is a **character-level tokenizer**: every unique character in the dataset
+gets an integer ID. A special `BOS` (beginning-of-sequence) token is appended
+at position `length(uchars)` and used to mark both the start and the end of
+each name.
+
+`uchars` is the vocabulary — a sorted character vector where `uchars[i]`
+corresponds to token ID `i - 1` (0-based). Because R is 1-indexed but the
+model logic follows Python's 0-based convention, you'll see `+ 1L` corrections
+throughout.
+
+---
+
+## 3. Autograd: the `Value` class
+
+This is the heart of the engine. Instead of computing numbers directly, every
+arithmetic operation produces a `Value` node that remembers:
+
+- `data` — the scalar result
+- `children` — the `Value` inputs that produced it
+- `local_grads` — the partial derivatives of this node with respect to each child
+- `grad` — accumulated gradient (filled in by `backward()`)
+
+This forms a **computation graph** that can be traversed in reverse to compute
+gradients automatically (backpropagation).
+
+```{r}
+#| label: value-class
+
+.vid <- 0L   # global counter for unique node IDs
+
+Value <- R6Class("Value",
+  cloneable = FALSE,
+  public = list(
+    id = NULL, data = NULL, grad = NULL,
+    children = NULL, local_grads = NULL,
+
+    initialize = function(data, children = list(), local_grads = list()) {
+      .vid         <<- .vid + 1L
+      self$id          <- .vid
+      self$data        <- as.double(data)
+      self$grad        <- 0.0
+      self$children    <- children
+      self$local_grads <- local_grads
+    },
+
+    # --- Forward operations (each returns a new Value) ---
+
+    add = function(other) {
+      if (!inherits(other, "Value")) other <- Value$new(other)
+      # d(a+b)/da = 1,  d(a+b)/db = 1
+      Value$new(self$data + other$data, list(self, other), list(1.0, 1.0))
+    },
+
+    mul = function(other) {
+      if (!inherits(other, "Value")) other <- Value$new(other)
+      # d(a*b)/da = b,  d(a*b)/db = a
+      Value$new(self$data * other$data, list(self, other), list(other$data, self$data))
+    },
+
+    pow_val = function(exp) {
+      # d(x^n)/dx = n * x^(n-1)
+      Value$new(self$data^exp, list(self), list(exp * self$data^(exp - 1)))
+    },
+
+    log_val = function() {
+      # d(ln x)/dx = 1/x
+      Value$new(log(self$data), list(self), list(1.0 / self$data))
+    },
+
+    exp_val = function() {
+      e <- exp(self$data)
+      # d(e^x)/dx = e^x
+      Value$new(e, list(self), list(e))
+    },
+
+    relu = function() {
+      # d(max(0,x))/dx = 1 if x > 0, else 0
+      Value$new(max(0.0, self$data), list(self), list(as.double(self$data > 0)))
+    },
+
+    neg = function() self$mul(-1.0),
+    sub = function(other) { if (!inherits(other, "Value")) other <- Value$new(other); self$add(other$neg()) },
+    div = function(other) { if (!inherits(other, "Value")) other <- Value$new(other); self$mul(other$pow_val(-1.0)) },
+
+    # --- Backward pass ---
+    backward = function() {
+      # 1. Topological sort (post-order)
+      topo    <- list()
+      visited <- new.env(hash = TRUE, parent = emptyenv())
+
+      build_topo <- function(v) {
+        id_str <- as.character(v$id)
+        if (!exists(id_str, envir = visited, inherits = FALSE)) {
+          assign(id_str, TRUE, envir = visited)
+          for (child in v$children) build_topo(child)
+          topo[[length(topo) + 1L]] <<- v
+        }
+      }
+
+      build_topo(self)
+      self$grad <- 1.0          # dL/dL = 1
+
+      # 2. Chain rule in reverse topological order
+      for (v in rev(topo)) {
+        for (i in seq_along(v$children)) {
+          v$children[[i]]$grad <- v$children[[i]]$grad +
+            v$local_grads[[i]] * v$grad
+        }
+      }
+    }
+  )
+)
+```
+
+### Operator overloading
+
+R's S3 system lets us write natural expressions like `a + b` or `a * b` when
+`a` and `b` are `Value` objects, rather than `a$add(b)`.
+
+```{r}
+#| label: operators
+
+`+.Value` <- function(a, b) { if (is.numeric(a)) a <- Value$new(a); if (is.numeric(b)) b <- Value$new(b); a$add(b) }
+`*.Value` <- function(a, b) { if (is.numeric(a)) a <- Value$new(a); if (is.numeric(b)) b <- Value$new(b); a$mul(b) }
+`-.Value` <- function(a, b) { if (missing(b)) return(a$neg()); if (is.numeric(b)) b <- Value$new(b); a$sub(b) }
+`/.Value` <- function(a, b) { if (is.numeric(a)) a <- Value$new(a); if (is.numeric(b)) b <- Value$new(b); a$div(b) }
+`^.Value` <- function(a, b) a$pow_val(b)
+```
+
+### A minimal autograd example
+
+```{r}
+#| label: autograd-example
+
+# Compute L = (a * b) + c  and find dL/da, dL/db, dL/dc
+
+a <- Value$new(2.0)
+b <- Value$new(3.0)
+c <- Value$new(1.0)
+
+L <- (a * b) + c   # L = 7
+L$backward()
+
+cat("L     =", L$data,   "\n")   # 7
+cat("dL/da =", a$grad,   "\n")   # = b = 3
+cat("dL/db =", b$grad,   "\n")   # = a = 2
+cat("dL/dc =", c$grad,   "\n")   # = 1
+```
+
+::: {.callout-note}
+The `backward()` method walks the graph in reverse topological order and
+accumulates `local_grad * upstream_grad` into each node's `grad` field. This
+is exactly the chain rule.
+:::
+
+---
+
+## 4. Model Parameters
+
+```{r}
+#| label: hyperparams
+
+n_layer    <- 1L    # number of transformer layers
+n_embd     <- 16L   # embedding dimension
+block_size <- 16L   # maximum sequence length
+n_head     <- 4L    # number of attention heads
+head_dim   <- n_embd %/% n_head   # dimension per head (= 4)
+```
+
+A **matrix** of `Value` nodes is just a list-of-lists: `w[[i]][[j]]` is the
+`Value` at row `i`, column `j`.
+
+```{r}
+#| label: make-matrix
+
+make_matrix <- function(nout, nin, std = 0.08) {
+  lapply(seq_len(nout), function(i)
+    lapply(seq_len(nin), function(j) Value$new(rnorm(1L, 0, std)))
+  )
+}
+```
+
+The full parameter set (`state_dict`) contains:
+
+| Name | Shape | Role |
+|---|---|---|
+| `wte` | `vocab_size × n_embd` | Token embedding table |
+| `wpe` | `block_size × n_embd` | Position embedding table |
+| `lm_head` | `vocab_size × n_embd` | Output projection (logits) |
+| `layerN.attn_wq/wk/wv/wo` | `n_embd × n_embd` | Attention Q/K/V/output |
+| `layerN.mlp_fc1` | `4·n_embd × n_embd` | MLP first layer |
+| `layerN.mlp_fc2` | `n_embd × 4·n_embd` | MLP second layer |
+
+```{r}
+#| label: state-dict
+
+state_dict <- list(
+  wte     = make_matrix(vocab_size, n_embd),
+  wpe     = make_matrix(block_size, n_embd),
+  lm_head = make_matrix(vocab_size, n_embd)
+)
+for (i in seq_len(n_layer) - 1L) {
+  li <- as.character(i)
+  state_dict[[paste0("layer", li, ".attn_wq")]] <- make_matrix(n_embd, n_embd)
+  state_dict[[paste0("layer", li, ".attn_wk")]] <- make_matrix(n_embd, n_embd)
+  state_dict[[paste0("layer", li, ".attn_wv")]] <- make_matrix(n_embd, n_embd)
+  state_dict[[paste0("layer", li, ".attn_wo")]] <- make_matrix(n_embd, n_embd)
+  state_dict[[paste0("layer", li, ".mlp_fc1")]] <- make_matrix(4L * n_embd, n_embd)
+  state_dict[[paste0("layer", li, ".mlp_fc2")]] <- make_matrix(n_embd, 4L * n_embd)
+}
+
+# Flatten all Value nodes into one list for the optimizer
+params <- list()
+for (mat in state_dict) {
+  for (row in mat) params <- c(params, row)
+}
+cat(sprintf("num params: %d\n", length(params)))
+```
+
+---
+
+## 5. Model Architecture
+
+### Helper functions
+
+**`linear(x, w)`** — matrix–vector multiply. `x` is a list of `n` `Value`
+scalars; `w` is a list of rows, each a list of `n` weights. Returns a list of
+`nrow(w)` `Value` scalars.
+
+```{r}
+#| label: linear
+
+linear <- function(x, w) {
+  lapply(w, function(wo) Reduce("+", Map("*", wo, x)))
+}
+```
+
+**`softmax(logits)`** — numerically stable softmax. Subtracting the max before
+exponentiating prevents overflow.
+
+```{r}
+#| label: softmax
+
+softmax <- function(logits) {
+  max_val <- max(vapply(logits, function(v) v$data, numeric(1L)))
+  exps    <- lapply(logits, function(val) (val - max_val)$exp_val())
+  total   <- Reduce("+", exps)
+  lapply(exps, function(e) e / total)
+}
+```
+
+**`rmsnorm(x)`** — Root Mean Square normalisation. Scales the vector so its
+RMS is ~1, which stabilises training.
+
+```{r}
+#| label: rmsnorm
+
+rmsnorm <- function(x) {
+  ms    <- Reduce("+", lapply(x, function(xi) xi * xi)) / length(x)
+  scale <- (ms + 1e-5)^(-0.5)
+  lapply(x, function(xi) xi * scale)
+}
+```
+
+### The GPT forward pass
+
+`gpt()` processes one token at a time. It accepts the current `token_id` and
+`pos_id`, plus the accumulated `keys` and `values` from previous positions (the
+KV cache). It returns updated logits and the extended KV cache.
+
+```{r}
+#| label: gpt
+
+gpt <- function(token_id, pos_id, keys, values) {
+
+  # ---- Embedding lookup ----
+  tok_emb <- state_dict[["wte"]][[token_id + 1L]]
+  pos_emb <- state_dict[["wpe"]][[pos_id  + 1L]]
+  x <- Map("+", tok_emb, pos_emb)
+  x <- rmsnorm(x)
+
+  for (li in seq_len(n_layer) - 1L) {
+    lk  <- as.character(li)
+    idx <- li + 1L          # 1-based index into the KV cache
+
+    # ---- Multi-Head Self-Attention ----
+    x_residual <- x
+    x  <- rmsnorm(x)
+    q  <- linear(x, state_dict[[paste0("layer", lk, ".attn_wq")]])
+    k  <- linear(x, state_dict[[paste0("layer", lk, ".attn_wk")]])
+    vp <- linear(x, state_dict[[paste0("layer", lk, ".attn_wv")]])
+
+    # Append current key / value to the KV cache
+    keys[[idx]]   <- c(keys[[idx]],   list(k))
+    values[[idx]] <- c(values[[idx]], list(vp))
+
+    T_len  <- length(keys[[idx]])   # how many past tokens (including current)
+    x_attn <- list()
+
+    for (h in seq_len(n_head) - 1L) {
+      # Slice out this head's portion of Q, K, V
+      hs  <- h * head_dim
+      q_h <- q[(hs + 1L):(hs + head_dim)]
+      k_h <- lapply(keys[[idx]],   function(ki) ki[(hs + 1L):(hs + head_dim)])
+      v_h <- lapply(values[[idx]], function(vi) vi[(hs + 1L):(hs + head_dim)])
+
+      # Scaled dot-product attention
+      attn_logits  <- lapply(seq_len(T_len), function(t) {
+        Reduce("+", Map("*", q_h, k_h[[t]])) / sqrt(head_dim)
+      })
+      attn_weights <- softmax(attn_logits)
+
+      # Weighted sum of values
+      head_out <- lapply(seq_len(head_dim), function(j) {
+        Reduce("+", lapply(seq_len(T_len), function(t) attn_weights[[t]] * v_h[[t]][[j]]))
+      })
+      x_attn <- c(x_attn, head_out)
+    }
+
+    # Project concatenated heads back to n_embd, then add residual
+    x <- linear(x_attn, state_dict[[paste0("layer", lk, ".attn_wo")]])
+    x <- Map("+", x, x_residual)
+
+    # ---- MLP block ----
+    x_residual <- x
+    x <- rmsnorm(x)
+    x <- linear(x, state_dict[[paste0("layer", lk, ".mlp_fc1")]])
+    x <- lapply(x, function(xi) xi$relu())    # ReLU activation
+    x <- linear(x, state_dict[[paste0("layer", lk, ".mlp_fc2")]])
+    x <- Map("+", x, x_residual)
+  }
+
+  logits <- linear(x, state_dict[["lm_head"]])
+  list(logits = logits, keys = keys, values = values)
+}
+```
+
+::: {.callout-note}
+## Why return `keys` and `values`?
+
+Python lists mutate in place (`list.append()`). R lists do not — they are
+copied on modification. So `gpt()` must *return* the updated KV cache and the
+caller must reassign it.
+:::
+
+The architecture, step by step for a single token:
+
+1. **Embedding** — look up the token's row in `wte` and add the position's row
+   from `wpe`.
+2. **RMSNorm** — normalise the embedding vector.
+3. **Multi-head attention** — for each head, compute Q·K scaled dot-product
+   scores over all past tokens, apply softmax to get weights, then take a
+   weighted sum of V vectors.
+4. **Output projection + residual** — project concatenated head outputs back to
+   `n_embd`, add the pre-attention residual.
+5. **MLP + residual** — two linear layers with a ReLU in between, plus another
+   residual connection.
+6. **LM head** — one final linear layer producing one logit per vocabulary
+   token.
+
+---
+
+## 6. Adam Optimizer
+
+```{r}
+#| label: optimizer
+
+learning_rate <- 0.01
+beta1         <- 0.85
+beta2         <- 0.99
+eps_adam      <- 1e-8
+
+m_buf <- rep(0.0, length(params))   # first moment (mean of gradients)
+v_buf <- rep(0.0, length(params))   # second moment (variance of gradients)
+```
+
+Adam keeps running estimates of the gradient's first and second moments
+(`m_buf` and `v_buf`). At each step it corrects for initialisation bias and
+divides by the root second moment, giving each parameter an adaptive effective
+learning rate.
+
+---
+
+## 7. Training Loop
+
+::: {.callout-important}
+## This chunk is not evaluated at render time
+
+Training 1000 steps on a scalar autograd engine takes several minutes. To run
+it yourself, source `microgpt.R` directly or execute this chunk interactively
+in RStudio.
+:::
+
+```{r}
+#| label: training
+#| eval: false
+
+num_steps <- 1000L
+cat("Training...\n")
+
+for (step in seq_len(num_steps)) {
+
+  # Cycle through documents
+  doc    <- docs[(step - 1L) %% length(docs) + 1L]
+  chars  <- strsplit(doc, "")[[1L]]
+  # Wrap the name with BOS tokens: [BOS, c1, c2, ..., cn, BOS]
+  tokens <- c(BOS, match(chars, uchars) - 1L, BOS)
+  n      <- min(block_size, length(tokens) - 1L)
+
+  # ---- Forward pass ----
+  keys_fwd   <- lapply(seq_len(n_layer), function(i) list())
+  values_fwd <- lapply(seq_len(n_layer), function(i) list())
+  losses     <- list()
+
+  for (pos_id in seq_len(n) - 1L) {
+    token_id  <- tokens[pos_id + 1L]
+    target_id <- tokens[pos_id + 2L]          # next token is the label
+    result    <- gpt(token_id, pos_id, keys_fwd, values_fwd)
+    keys_fwd   <- result$keys
+    values_fwd <- result$values
+    probs      <- softmax(result$logits)
+    # Cross-entropy loss for this position: -log(p[target])
+    loss_t     <- probs[[target_id + 1L]]$log_val()$neg()
+    losses     <- c(losses, list(loss_t))
+  }
+
+  # Average loss across all positions in this document
+  loss <- Reduce("+", losses) / n
+
+  # ---- Backward pass ----
+  loss$backward()
+
+  # ---- Adam update with linear LR decay ----
+  lr_t <- learning_rate * (1 - step / num_steps)
+  for (i in seq_along(params)) {
+    g        <- params[[i]]$grad
+    m_buf[i] <- beta1 * m_buf[i] + (1 - beta1) * g
+    v_buf[i] <- beta2 * v_buf[i] + (1 - beta2) * g^2
+    m_hat    <- m_buf[i] / (1 - beta1^step)     # bias correction
+    v_hat    <- v_buf[i] / (1 - beta2^step)
+    params[[i]]$data <- params[[i]]$data - lr_t * m_hat / (sqrt(v_hat) + eps_adam)
+    params[[i]]$grad <- 0.0                      # zero gradients for next step
+  }
+
+  cat(sprintf("\rstep %4d / %4d | loss %.4f", step, num_steps, loss$data))
+}
+cat("\n")
+```
+
+Key points:
+
+- **One document per step.** We cycle through the shuffled doc list.
+- **Cross-entropy loss** at each position: $-\log p(\text{target})$, averaged
+  over positions.
+- **Gradients are zeroed** (`grad <- 0.0`) after each update so they don't
+  accumulate across steps.
+- **Linear LR decay** shrinks the learning rate to 0 by the final step.
+
+---
+
+## 8. Inference (Sampling)
+
+After training, the model generates new names by starting from the `BOS` token
+and autoregressively sampling the next token until `BOS` appears again.
+
+::: {.callout-important}
+## This chunk is not evaluated at render time
+
+Inference requires a trained model. Run the training loop first, then execute
+this chunk interactively.
+:::
+
+```{r}
+#| label: inference
+#| eval: false
+
+temperature <- 0.5   # lower = sharper / more predictable distribution
+
+cat("--- inference (new, hallucinated names) ---\n")
+
+for (sample_idx in seq_len(20L)) {
+  keys_inf   <- lapply(seq_len(n_layer), function(i) list())
+  values_inf <- lapply(seq_len(n_layer), function(i) list())
+  token_id   <- BOS
+  sample_chars <- character(0)
+
+  for (pos_id in seq_len(block_size) - 1L) {
+    result     <- gpt(token_id, pos_id, keys_inf, values_inf)
+    keys_inf   <- result$keys
+    values_inf <- result$values
+
+    # Divide logits by temperature before softmax
+    probs    <- softmax(lapply(result$logits, function(l) l / temperature))
+    weights  <- vapply(probs, function(p) p$data, numeric(1L))
+    token_id <- sample(seq_len(vocab_size) - 1L, size = 1L, prob = weights)
+
+    if (token_id == BOS) break   # BOS doubles as EOS
+    sample_chars <- c(sample_chars, uchars[token_id + 1L])
+  }
+
+  cat(sprintf("sample %2d: %s\n", sample_idx, paste(sample_chars, collapse = "")))
+}
+```
+
+**Temperature** controls randomness:
+
+- `temperature < 1` — sharpens the distribution (more confident, less varied)
+- `temperature > 1` — flattens it (more random, more varied)
+- `temperature = 1` — raw model probabilities
+
+---
+
+## Summary
+
+`microgpt.R` packs a complete deep learning framework — autograd, a transformer
+architecture, and Adam — into ~320 lines of pure R. The key ideas are:
+
+1. **Computation graphs** built from scalar `Value` nodes enable automatic
+   differentiation without any external library.
+2. **The transformer** combines token + position embeddings, multi-head
+   attention (with a KV cache), and an MLP block, repeated for each layer.
+3. **Adam** adapts per-parameter learning rates using moment estimates, making
+   training robust to varying gradient scales.
+4. **Autoregressive sampling** generates sequences one token at a time,
+   conditioning on everything seen so far via the KV cache.
+
+::: {.callout-tip}
+## Going further
+
+- Increase `n_layer`, `n_embd`, or `n_head` for a larger model (but expect
+  much slower training in pure R).
+- Swap the names dataset for any character-level corpus.
+- Try adjusting `temperature` during inference to see how it changes output
+  diversity.
+:::

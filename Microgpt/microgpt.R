@@ -9,15 +9,16 @@ set.seed(7391)
 
 # ---- Dataset ----
 
-if (!file.exists("input.txt")) {
-  download.file(
-    "https://raw.githubusercontent.com/karpathy/makemore/988aa59/names.txt",
-    "input.txt"
-  )
-}
-docs <- readLines("input.txt", warn = FALSE)
+# if (!file.exists("input.txt")) {
+#   download.file(
+#     "https://raw.githubusercontent.com/karpathy/makemore/988aa59/names.txt",
+#     "input.txt"
+#   )
+# }
+
+docs <- readLines("Microgpt/names.txt", warn=F)
 docs <- docs[nchar(trimws(docs)) > 0]
-docs <- sample(docs)
+docs <- sample(docs) # scramble to avoid spurious ordering effects
 cat(sprintf("num docs: %d\n", length(docs)))
 
 # ---- Tokenizer ----
