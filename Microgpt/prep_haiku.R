@@ -3,7 +3,6 @@
 # and adds line number, narrative arc label, and syllable count.
 # Outputs a tidy CSV with one row per haiku line.
 
-library(tidyverse)
 
 # ---- Syllable counter ----
 # Builds a lookup table from the full word vocabulary in one nsyllable() call,

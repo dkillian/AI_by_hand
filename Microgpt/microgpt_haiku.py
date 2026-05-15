@@ -19,22 +19,35 @@ import random
 random.seed(8142)
 
 # ---- Dataset ----
+# Reads haiku_lines.csv (one row per line, produced by prep_haiku.R).
+# Reconstructs full haiku strings ("line1 / line2 / line3") grouped by haiku_id.
+# Only keeps haikus with exactly 3 lines that match the 5-7-5 syllable pattern.
+
+from collections import defaultdict
 
 haiku_path = os.path.join(
     os.path.dirname(__file__),
-    "../../Embedded Poet/data/Poetry/haikus.csv"
+    "../../Embedded Poet/data/Poetry/haiku_lines.csv"
 )
 
-docs = []
+haiku_groups = defaultdict(list)
 with open(haiku_path, newline='', encoding='utf-8') as f:
     reader = csv.DictReader(f)
     for row in reader:
-        text = row.get('text', '').strip()
-        if text:
-            docs.append(text)
+        if row.get('is_5_7_5', '').strip().upper() != 'TRUE':
+            continue
+        haiku_groups[row['haiku_id']].append(
+            (int(row['line_num']), row['line_text'].strip())
+        )
+
+docs = []
+for lines in haiku_groups.values():
+    lines_sorted = sorted(lines, key=lambda x: x[0])
+    if len(lines_sorted) == 3:
+        docs.append(' / '.join(t for _, t in lines_sorted))
 
 random.shuffle(docs)
-print(f"num docs: {len(docs)}")
+print(f"num docs: {len(docs)} (5-7-5 haikus)")
 
 # ---- Tokenizer ----
 
